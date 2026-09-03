@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Himnos del Mundo — audio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d;
+    --accent:#f4b740; --good:#6fe7dd; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh; padding: 40px 16px 80px;
+  }
+  .wrap{ max-width: 760px; margin:0 auto; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:24px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:10px;
+  }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 28px; margin:0 0 10px; }
+  p.lede{ color:var(--dim); font-size:14px; line-height:1.6; margin:0 0 22px; max-width:56ch;}
+
+  .tabs{ display:flex; gap:8px; margin-bottom: 24px; }
+  .tab{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:500;
+    background:none; border:1px solid var(--line); color:var(--dim);
+    border-radius:20px; padding:8px 16px; cursor:pointer;
+  }
+  .tab.active{ border-color: var(--accent); color: var(--accent); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* --- learn mode --- */
+  .grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 10px;
+  }
+  .flagcard{
+    background: var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding: 12px; text-align:center; cursor:pointer;
+    transition: border-color .2s ease, transform .15s ease;
+  }
+  .flagcard:hover{ border-color: var(--accent); transform: translateY(-2px); }
+  .flagcard.playing{ border-color: var(--good); }
+  .flagcard svg{ width:100%; height:56px; border-radius:4px; border:1px solid var(--line); display:block; margin-bottom:8px; }
+  .flagcard .name{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text); }
+  .flagcard .status{ font-family:'JetBrains Mono', monospace; font-size:9px; color:var(--dim); margin-top:3px; text-transform:uppercase; }
+  .flagcard.missing{ opacity: .5; cursor:default; }
+
+  /* --- play mode --- */
+  .progress{ display:flex; gap:6px; margin-bottom: 20px; }
+  .progress span{ flex:1; height:4px; border-radius:4px; background: var(--line); }
+  .progress span.done{ background: var(--accent); }
+  .progress span.current{ background: var(--dim); }
+
+  .card{ background: var(--panel); border:1px solid var(--line); border-radius:14px; padding:30px; text-align:center; }
+  .round-label{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:20px; }
+
+  .playbtn{
+    width:74px; height:74px; border-radius:50%; border:none; cursor:pointer;
+    background: var(--accent); color:#0b0d0c; font-size:26px; margin: 0 auto 26px; display:flex; align-items:center; justify-content:center;
+  }
+  .playbtn:hover{ opacity:.9; }
+  .playbtn.playing{ background: var(--good); }
+
+  .hint{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim); margin-bottom:26px; }
+
+  .options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:left; }
+  @media (max-width:480px){ .options{ grid-template-columns:1fr; } }
+  .opt{
+    font-family:'Inter', sans-serif; font-size:13px; font-weight:500;
+    background:#0f1213; border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:10px; cursor:pointer; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .opt:hover:not(:disabled){ border-color: var(--accent); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ border-color: var(--good); background: rgba(111,231,221,0.1); color: var(--good); }
+  .opt.wrong{ border-color: var(--bad); background: rgba(255,107,107,0.1); color: var(--bad); }
+  .opt svg{
+    width:100%; height:52px; border-radius:4px; border:1px solid var(--line); display:block;
+  }
+  .opt.correct svg{ border-color: var(--good); }
+  .opt.wrong svg{ border-color: var(--bad); }
+  .opt .optname{ line-height:1.2; }
+
+  .next{
+    margin-top:20px; width:100%; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background: var(--accent); color:#0b0d0c; border:none; border-radius:8px; padding:13px; cursor:pointer; display:none;
+  }
+  .next.show{ display:block; }
+
+  .result{ display:none; text-align:center; }
+  .result.show{ display:block; }
+  .result .score{ font-family:'Space Grotesk', sans-serif; font-size:56px; font-weight:700; margin:6px 0 4px; }
+  .result .score span{ font-size:20px; color:var(--dim); font-weight:400; }
+  .result .verdict{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:12px;
+    padding: 5px 14px; border-radius:20px; margin-bottom:18px;
+  }
+  .verdict.win{ background: rgba(111,231,221,.12); color: var(--good); border:1px solid var(--good); }
+  .verdict.lose{ background: rgba(255,107,107,.12); color: var(--bad); border:1px solid var(--bad); }
+  .result p.msg{ color:var(--dim); font-size:14px; margin: 0 0 24px; }
+  .restart{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background:none; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:13px; cursor:pointer;
+  }
+  .restart:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .note{
+    margin-top: 26px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim); line-height:1.6;
+    border-top:1px solid var(--line); padding-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 02 · audio</div>
+  <h1>Himnos del Mundo</h1>
+  <p class="lede">
+    23 países. Primero aprendé cómo suena cada himno, después jugá: se reproduce
+    un himno y tenés que adivinar el país entre 4 opciones. 10 rondas — necesitás
+    acertar al menos 6 para ganar.
+  </p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="learn">aprender</button>
+    <button class="tab" data-tab="play">jugar</button>
+  </div>
+
+  <!-- LEARN VIEW -->
+  <div class="view active" id="learnView">
+    <div class="grid" id="learnGrid"></div>
+    <p class="note" id="learnNote"></p>
+  </div>
+
+  <!-- PLAY VIEW -->
+  <div class="view" id="playView">
+    <div class="progress" id="progress"></div>
+    <div class="card">
+      <div id="quizArea">
+        <div class="round-label" id="roundLabel">Ronda 1 de 10</div>
+        <button class="playbtn" id="playBtn">▶</button>
+        <div class="hint" id="hintText">tocá para escuchar el himno</div>
+        <div class="options" id="optionsArea"></div>
+        <button class="next" id="nextBtn">siguiente &rarr;</button>
+      </div>
+      <div class="result" id="resultArea">
+        <div class="round-label">resultado final</div>
+        <div class="score"><span id="scoreNum">0</span><span> / 10</span></div>
+        <div class="verdict" id="verdict"></div>
+        <p class="msg" id="resultMsg"></p>
+        <button class="restart" id="restartBtn">jugar de nuevo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="player" preload="none"></audio>
+
+<script>
+(function(){
+
+  // ============================================================
+  // CONFIG DE AUDIO
+  // Cada país apunta a un archivo de audio libre alojado en
+  // Wikimedia Commons (dominio público / uso libre), enlazado por
+  // nombre exacto de archivo vía Special:FilePath — no se aloja
+  // ni se reproduce nada con derechos reservados.
+  //
+  // Para completar los países marcados con "" (aún sin audio):
+  // 1. Buscá en https://commons.wikimedia.org "national anthem of <país>"
+  // 2. Copiá el nombre EXACTO del archivo (con espacios, mayúsculas, extensión)
+  // 3. Pegalo entre las comillas de "audio" abajo.
+  // ============================================================
+
+  const commonsFile = (name) => name
+    ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(name)}`
+    : null;
+
+  const countries = [
+    { name: "Francia", audio: "La Marseillaise.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="50" height="100" fill="#0055A4"/><rect x="100" width="50" height="100" fill="#EF4135"/>` },
+    { name: "Chile", audio: "National Anthem of Chile.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect y="50" width="150" height="50" fill="#D52B1E"/><rect width="50" height="50" fill="#0039A6"/>
+      <polygon points="25,14 29,27 42,27 31,35 35,48 25,40 15,48 19,35 8,27 21,27" fill="#FFFFFF"/>` },
+    { name: "Argentina", audio: "Himno Nacional Argentino instrumental.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#74ACDF"/><rect y="66.6" width="150" height="33.4" fill="#74ACDF"/>
+      <circle cx="75" cy="50" r="12" fill="#F6B40E" stroke="#85572E" stroke-width="1"/>` },
+    { name: "Uruguay", audio: "HimnoNacionalUruguay.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      ${Array.from({length:4}).map((_,i)=>`<rect y="${11+i*22}" width="150" height="11" fill="#0038A8"/>`).join('')}
+      <rect width="45" height="45" fill="#FFFFFF" stroke="#262c2b" stroke-width="0.5"/><circle cx="22" cy="22" r="10" fill="#F6B40E"/>` },
+    { name: "España", audio: "Marcha Real.ogg", flag: `
+      <rect width="150" height="100" fill="#AA151B"/><rect y="25" width="150" height="50" fill="#F1BF00"/>` },
+    { name: "Brasil", audio: "Hino-Nacional-Brasil-instrumental-mec.ogg", flag: `
+      <rect width="150" height="100" fill="#009739"/><polygon points="75,15 140,50 75,85 10,50" fill="#FEDD00"/><circle cx="75" cy="50" r="20" fill="#012169"/>` },
+    { name: "México", audio: "Himno Nacional Mexicano (Instrumental).ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="50" height="100" fill="#006847"/><rect x="100" width="50" height="100" fill="#CE1126"/><circle cx="75" cy="50" r="9" fill="#8B5E34"/>` },
+    { name: "Estados Unidos", audio: "The Star-Spangled Banner (USMC Band).ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      ${Array.from({length:7}).map((_,i)=>`<rect y="${i*100/13*2}" width="150" height="${100/13}" fill="#B22234"/>`).join('')}
+      <rect width="65" height="53.8" fill="#3C3B6E"/>` },
+    { name: "Bélgica", audio: "La Brabançonne.oga", flag: `
+      <rect width="150" height="100" fill="#FFDD00"/><rect width="50" height="100" fill="#000000"/><rect x="100" width="50" height="100" fill="#EF3340"/>` },
+    { name: "Holanda", audio: "Het-Wilhelmus.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#AE1C28"/><rect y="66.6" width="150" height="33.4" fill="#21468B"/>` },
+    { name: "Suiza", audio: "Swiss Psalm.ogg", flag: `
+      <rect width="150" height="100" fill="#FF0000"/><rect x="63" y="30" width="24" height="40" fill="#FFFFFF"/><rect x="51" y="42" width="48" height="16" fill="#FFFFFF"/>` },
+    { name: "Cabo Verde", audio: "Cântico da Liberdade (instrumental).ogg", flag: `
+      <rect width="150" height="100" fill="#003893"/><rect y="60" width="150" height="6" fill="#FFFFFF"/><rect y="66" width="150" height="6" fill="#CF2027"/><rect y="72" width="150" height="6" fill="#FFFFFF"/>
+      ${Array.from({length:10}).map((_,i)=>{const a=(i/10)*2*Math.PI-Math.PI/2;const x=75+18*Math.cos(a);const y=50+18*Math.sin(a);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#F7D116"/>`}).join('')}` },
+    { name: "Portugal", audio: "A Portuguesa.ogg", flag: `
+      <rect width="150" height="100" fill="#FF0000"/><rect width="60" height="100" fill="#006600"/><circle cx="60" cy="50" r="16" fill="#F7D116" stroke="#FFFFFF" stroke-width="1"/>` },
+    { name: "Noruega", audio: "Norway (National Anthem).ogg", flag: `
+      <rect width="150" height="100" fill="#EF2B2D"/><rect x="45" width="20" height="100" fill="#FFFFFF"/><rect y="40" width="150" height="20" fill="#FFFFFF"/>
+      <rect x="51" width="8" height="100" fill="#002868"/><rect y="46" width="150" height="8" fill="#002868"/>` },
+    { name: "Inglaterra", audio: "U.S. Navy Band - God Save the King.oga", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect x="63" width="24" height="100" fill="#CE1124"/><rect y="38" width="150" height="24" fill="#CE1124"/>` },
+    { name: "Jamaica", audio: "\"Jamaica, Land We Love\", performed by the United States Navy Band.oga", flag: `
+      <rect width="150" height="100" fill="#009B3A"/><polygon points="0,0 75,50 0,100" fill="#000000"/><polygon points="150,0 75,50 150,100" fill="#000000"/>
+      <polygon points="0,0 150,100" stroke="#FED100" stroke-width="14" fill="none"/><polygon points="150,0 0,100" stroke="#FED100" stroke-width="14" fill="none"/>` },
+    { name: "Perú", audio: "United States Navy Band - Marcha Nacional del Perú.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="37.5" height="100" fill="#D91023"/><rect x="112.5" width="37.5" height="100" fill="#D91023"/>` },
+    { name: "Paraguay", audio: "Paraguayan National Anthem.oga", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#D52B1E"/><rect y="66.6" width="150" height="33.4" fill="#0038A8"/><circle cx="75" cy="50" r="12" fill="#FFDE00" stroke="#0038A8" stroke-width="1"/>` },
+    { name: "Bolivia", audio: "Himno Nacional de Bolivia instrumental.ogg", flag: `
+      <rect width="150" height="100" fill="#D52B1E"/><rect y="33.3" width="150" height="33.4" fill="#F9E300"/><rect y="66.6" width="150" height="33.4" fill="#007934"/>` },
+    { name: "Colombia", audio: "United States Navy Band - ¡Oh, gloria inmarcesible!.ogg", flag: `
+      <rect width="150" height="100" fill="#FCD116"/><rect y="50" width="150" height="25" fill="#003893"/><rect y="75" width="150" height="25" fill="#CE1126"/>` },
+    { name: "Vietnam", audio: "", flag: `
+      <rect width="150" height="100" fill="#DA251D"/><polygon points="75,25 84,52 113,52 90,68 98,95 75,79 52,95 60,68 37,52 66,52" fill="#FFFF00"/>` },
+    { name: "Egipto", audio: "Bilady, Bilady, Bilady.ogg", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#CE1126"/><rect y="66.6" width="150" height="33.4" fill="#000000"/><circle cx="75" cy="50" r="10" fill="#C09300"/>` },
+    { name: "El Congo", audio: "Democratic Republic of the Congo's national anthem.ogg", flag: `
+      <rect width="150" height="100" fill="#007FFF"/><polygon points="0,100 100,0 130,0 0,100" fill="#F7D618" stroke="#F7D618" stroke-width="18"/><polygon points="115,0 150,0 150,35" fill="#CE1021"/><polygon points="0,65 0,100 35,100" fill="#CE1021"/>` }
+  ];
+
+  countries.forEach(c => { c.audioUrl = commonsFile(c.audio); c.slug = c.name; });
+
+  const player = document.getElementById('player');
+
+  // ---------- TABS ----------
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab + 'View').classList.add('active');
+      player.pause();
+    });
+  });
+
+  // ---------- LEARN MODE ----------
+  const learnGrid = document.getElementById('learnGrid');
+  const learnNote = document.getElementById('learnNote');
+  let missingCount = 0;
+
+  countries.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'flagcard' + (c.audioUrl ? '' : ' missing');
+    card.innerHTML = `
+      <svg viewBox="0 0 150 100">${c.flag}</svg>
+      <div class="name">${c.name}</div>
+      <div class="status">${c.audioUrl ? 'tocar para oír' : 'audio pendiente'}</div>
+    `;
+    if(c.audioUrl){
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.flagcard').forEach(el => el.classList.remove('playing'));
+        card.classList.add('playing');
+        player.src = c.audioUrl;
+        player.play().catch(()=>{});
+      });
+    } else {
+      missingCount++;
+    }
+    learnGrid.appendChild(card);
+  });
+
+  player.addEventListener('ended', () => {
+    document.querySelectorAll('.flagcard').forEach(el => el.classList.remove('playing'));
+  });
+
+  if(missingCount > 0){
+    learnNote.textContent = `${missingCount} de ${countries.length} himnos todavía no tienen audio cargado — mirá el comentario CONFIG DE AUDIO en el código para completar los que falten.`;
+  }
+
+  // ---------- PLAY MODE ----------
+  const playable = () => countries.filter(c => c.audioUrl);
+
+  let rounds = [];
+  let idx = 0, score = 0, answered = false, log = [];
+
+  const progressEl = document.getElementById('progress');
+  const roundLabel = document.getElementById('roundLabel');
+  const playBtn = document.getElementById('playBtn');
+  const hintText = document.getElementById('hintText');
+  const optionsArea = document.getElementById('optionsArea');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizArea = document.getElementById('quizArea');
+  const resultArea = document.getElementById('resultArea');
+  const scoreNum = document.getElementById('scoreNum');
+  const verdictEl = document.getElementById('verdict');
+  const resultMsg = document.getElementById('resultMsg');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function setupRounds(){
+    const pool = playable();
+    const n = Math.min(10, pool.length);
+    rounds = shuffle(pool).slice(0, n);
+  }
+
+  function buildProgress(){
+    progressEl.innerHTML = '';
+    rounds.forEach((_, i) => {
+      const s = document.createElement('span');
+      if(i < idx) s.classList.add('done');
+      else if(i === idx) s.classList.add('current');
+      progressEl.appendChild(s);
+    });
+  }
+
+  function optionsFor(correct){
+    const others = countries.filter(c => c.name !== correct.name);
+    const picks = shuffle(others).slice(0,3);
+    return shuffle([correct, ...picks]);
+  }
+
+  function loadRound(){
+    answered = false;
+    const r = rounds[idx];
+    buildProgress();
+    roundLabel.textContent = `Ronda ${idx+1} de ${rounds.length}`;
+    playBtn.classList.remove('playing');
+    playBtn.textContent = '▶';
+    hintText.textContent = 'tocá para escuchar el himno';
+    nextBtn.classList.remove('show');
+    player.pause();
+    player.src = r.audioUrl;
+
+    optionsArea.innerHTML = '';
+    optionsFor(r).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.dataset.country = opt.name;
+      btn.innerHTML = `<svg viewBox="0 0 150 100">${opt.flag}</svg><span class="optname">${opt.name}</span>`;
+      btn.addEventListener('click', () => selectAnswer(btn, opt, r));
+      optionsArea.appendChild(btn);
+    });
+  }
+
+  playBtn.addEventListener('click', () => {
+    if(player.paused){
+      player.play().catch(()=>{ hintText.textContent = 'no se pudo reproducir — probá de nuevo'; });
+      playBtn.classList.add('playing');
+      playBtn.textContent = '❚❚';
+      hintText.textContent = 'reproduciendo…';
+    } else {
+      player.pause();
+      playBtn.classList.remove('playing');
+      playBtn.textContent = '▶';
+    }
+  });
+  player.addEventListener('ended', () => {
+    playBtn.classList.remove('playing');
+    playBtn.textContent = '▶';
+    hintText.textContent = 'tocá para escuchar de nuevo';
+  });
+
+  function selectAnswer(btn, chosen, r){
+    if(answered) return;
+    answered = true;
+    player.pause();
+    const correct = chosen.name === r.name;
+    if(correct) score++;
+    log.push({ country: r.name, correct });
+
+    [...optionsArea.children].forEach(b => {
+      b.disabled = true;
+      if(b.dataset.country === r.name) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+    });
+
+    nextBtn.classList.add('show');
+    nextBtn.textContent = idx === rounds.length - 1 ? 'ver resultado →' : 'siguiente →';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    idx++;
+    if(idx >= rounds.length) showResult();
+    else loadRound();
+  });
+
+  function showResult(){
+    quizArea.style.display = 'none';
+    resultArea.classList.add('show');
+    scoreNum.textContent = score;
+    scoreNum.nextElementSibling.textContent = ` / ${rounds.length}`;
+
+    const win = score >= 6;
+    verdictEl.textContent = win ? 'ganaste' : 'no alcanzó';
+    verdictEl.className = 'verdict ' + (win ? 'win' : 'lose');
+    resultMsg.textContent = win
+      ? 'necesitabas 6 de 10 — lo lograste.'
+      : 'necesitás al menos 6 de 10 — practicá en "aprender" y probá otra vez.';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    idx = 0; score = 0; log = [];
+    resultArea.classList.remove('show');
+    quizArea.style.display = 'block';
+    setupRounds();
+    loadRound();
+  });
+
+  setupRounds();
+  loadRound();
+})();
+</script>
+</body>
+</html>

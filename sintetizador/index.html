@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sintetizador — Max/MSP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d; --c03:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+  }
+  .wrap{ max-width: 720px; margin:0 auto; padding:56px 24px 80px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:36px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--c03); margin-bottom:14px;
+  }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: clamp(28px,5vw,40px); margin:0 0 16px; }
+  p.lede{ color:var(--dim); line-height:1.65; max-width:56ch; margin:0 0 36px; }
+
+  .chain{
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 40px;
+  }
+  .node{
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    border:1px solid var(--line); border-radius: 20px; padding:8px 14px;
+    color:var(--text); background: var(--panel);
+  }
+  .arrow{ color:var(--dim); align-self:center; font-family:'JetBrains Mono', monospace; }
+
+  .dl{
+    display:inline-flex; align-items:center; gap:10px;
+    background: var(--c03); color:#0b0d0c; text-decoration:none;
+    font-family:'JetBrains Mono', monospace; font-weight:500; font-size:13px;
+    padding: 13px 22px; border-radius: 8px;
+  }
+  .dl:hover{ opacity:.9; }
+
+  .note{
+    margin-top: 20px; font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 03 · síntesis</div>
+  <h1>Sintetizador sustractivo</h1>
+  <p class="lede">
+    Patch construido en Max/MSP: oscilador con control de frecuencia, envolvente
+    on/off, filtro pasabajos con corte ajustable y salida estéreo. Pensado como
+    punto de partida simple — fácil de leer y de ampliar.
+  </p>
+
+  <div class="chain">
+    <span class="node">frecuencia</span><span class="arrow">→</span>
+    <span class="node">cycle~</span><span class="arrow">→</span>
+    <span class="node">envolvente</span><span class="arrow">→</span>
+    <span class="node">lores~</span><span class="arrow">→</span>
+    <span class="node">volumen</span><span class="arrow">→</span>
+    <span class="node">ezdac~</span>
+  </div>
+
+  <a class="dl" href="./synth.maxpat" download>descargar synth.maxpat</a>
+  <p class="note">requiere Max 8 o superior (Cycling '74) para abrirse y sonar.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego — señal / ruido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d; --c02:#6fe7dd; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding: 40px 16px 60px;
+  }
+  .wrap{ width:100%; max-width: 560px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:28px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--c02); margin-bottom:10px;
+  }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 28px; margin:0 0 10px; }
+  p.lede{ color:var(--dim); font-size:14px; line-height:1.6; margin:0 0 24px; max-width: 52ch;}
+
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--dim);
+    margin-bottom: 10px;
+  }
+  .hud b{ color: var(--text); font-weight:500; }
+
+  canvas{
+    width:100%; aspect-ratio: 8 / 9; display:block;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    touch-action: none;
+    cursor: none;
+  }
+
+  .controls{
+    margin-top: 14px; display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+  }
+  button{
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    background:none; color:var(--text); border:1px solid var(--line);
+    border-radius:20px; padding:8px 18px; cursor:pointer;
+  }
+  button:hover{ border-color: var(--c02); color: var(--c02); }
+
+  .overlay-msg{
+    font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--dim);
+    text-align:center; margin-top: 8px; min-height: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 02 · juego</div>
+  <h1>Señal / Ruido</h1>
+  <p class="lede">
+    Movete con el mouse, el dedo o las flechas. Atrapá las señales (círculos claros)
+    y esquivá el ruido (cuadrados rojos). Tres impactos y se corta la transmisión.
+  </p>
+
+  <div class="hud">
+    <span>puntaje: <b id="score">0</b></span>
+    <span>vidas: <b id="lives">●●●</b></span>
+  </div>
+
+  <canvas id="game" width="480" height="540"></canvas>
+  <div class="overlay-msg" id="msg">tocá / hacé clic para empezar</div>
+
+  <div class="controls">
+    <span>← → o mouse / touch para mover</span>
+    <button id="restart">reiniciar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const msgEl = document.getElementById('msg');
+  const restartBtn = document.getElementById('restart');
+
+  const W = canvas.width, H = canvas.height;
+  const player = { w: 64, h: 14, x: W/2 - 32, y: H - 34, speed: 7 };
+
+  let items = [];
+  let score = 0;
+  let lives = 3;
+  let running = false;
+  let spawnTimer = 0;
+  let spawnEvery = 55;
+  let frame = 0;
+  let keys = {};
+
+  function resetGame(){
+    items = [];
+    score = 0;
+    lives = 3;
+    spawnEvery = 55;
+    frame = 0;
+    player.x = W/2 - player.w/2;
+    scoreEl.textContent = score;
+    livesEl.textContent = '●●●';
+    running = true;
+    msgEl.textContent = '';
+    requestAnimationFrame(loop);
+  }
+
+  function spawn(){
+    const isNoise = Math.random() < 0.35;
+    const r = isNoise ? 12 : 9;
+    items.push({
+      x: Math.random() * (W - r*2) + r,
+      y: -r,
+      r,
+      vy: 2.4 + Math.random()*2 + score*0.01,
+      bad: isNoise
+    });
+  }
+
+  function drawPlayer(){
+    ctx.fillStyle = '#e9e7de';
+    ctx.beginPath();
+    ctx.roundRect(player.x, player.y, player.w, player.h, 7);
+    ctx.fill();
+  }
+
+  function drawItem(it){
+    ctx.beginPath();
+    if(it.bad){
+      ctx.fillStyle = '#ff6b6b';
+      ctx.save();
+      ctx.translate(it.x, it.y);
+      ctx.rotate(frame*0.05);
+      ctx.fillRect(-it.r, -it.r, it.r*2, it.r*2);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#6fe7dd';
+      ctx.arc(it.x, it.y, it.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function loop(){
+    if(!running) return;
+    frame++;
+    ctx.clearRect(0,0,W,H);
+
+    // faint grid background
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    for(let gx=0; gx<W; gx+=24){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+
+    // movement
+    if(keys['ArrowLeft']) player.x -= player.speed;
+    if(keys['ArrowRight']) player.x += player.speed;
+    player.x = Math.max(0, Math.min(W - player.w, player.x));
+
+    // spawn
+    spawnTimer++;
+    if(spawnTimer >= spawnEvery){
+      spawnTimer = 0;
+      spawn();
+      if(spawnEvery > 22) spawnEvery -= 0.4;
+    }
+
+    // update items
+    for(let i = items.length - 1; i >= 0; i--){
+      const it = items[i];
+      it.y += it.vy;
+
+      const hitX = it.x > player.x - it.r && it.x < player.x + player.w + it.r;
+      const hitY = it.y + it.r > player.y && it.y - it.r < player.y + player.h;
+
+      if(hitX && hitY){
+        items.splice(i,1);
+        if(it.bad){
+          lives--;
+          livesEl.textContent = '●'.repeat(Math.max(lives,0)) + '○'.repeat(3-lives);
+          if(lives <= 0){ gameOver(); return; }
+        } else {
+          score++;
+          scoreEl.textContent = score;
+        }
+        continue;
+      }
+
+      if(it.y - it.r > H){
+        items.splice(i,1);
+        if(!it.bad){
+          // missed signal, no penalty, just gone
+        }
+      }
+    }
+
+    items.forEach(drawItem);
+    drawPlayer();
+
+    requestAnimationFrame(loop);
+  }
+
+  function gameOver(){
+    running = false;
+    msgEl.textContent = 'transmisión cortada — puntaje final: ' + score + ' — tocá reiniciar';
+  }
+
+  // input: keyboard
+  window.addEventListener('keydown', e => { keys[e.key] = true; });
+  window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+  // input: mouse
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const scale = W / rect.width;
+    const x = (e.clientX - rect.left) * scale;
+    player.x = Math.max(0, Math.min(W - player.w, x - player.w/2));
+  });
+
+  // input: touch
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const scale = W / rect.width;
+    const x = (e.touches[0].clientX - rect.left) * scale;
+    player.x = Math.max(0, Math.min(W - player.w, x - player.w/2));
+  }, { passive:false });
+
+  canvas.addEventListener('click', () => { if(!running) resetGame(); });
+  restartBtn.addEventListener('click', resetGame);
+
+  // initial idle render
+  ctx.fillStyle = '#e9e7de';
+  drawPlayer();
+})();
+</script>
+</body>
+</html>

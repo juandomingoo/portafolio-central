@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — trabajos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0d0c;
+    --panel: #14181a;
+    --panel-line: #262c2b;
+    --text: #e9e7de;
+    --text-dim: #8c928d;
+    --c01: #f4b740; /* interfaz */
+    --c02: #6fe7dd; /* juego */
+    --c03: #ff6b6b; /* sintetizador */
+    --c04: #a78bfa; /* sonificador */
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before{
+    content:"";
+    position: fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(var(--panel-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: .18;
+    z-index: 0;
+  }
+
+  .wrap{
+    position: relative;
+    z-index: 1;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+
+  header{
+    padding-bottom: 40px;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 22px;
+  }
+
+  .eyebrow .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--c02);
+    box-shadow: 0 0 0 3px rgba(111,231,221,.15);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse{
+    0%,100%{ opacity: 1; }
+    50%{ opacity: .35; }
+  }
+
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(34px, 6vw, 54px);
+    line-height: 1.08;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+  }
+
+  h1 span{ color: var(--text-dim); font-weight: 400; }
+
+  .lede{
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 54ch;
+    margin: 0;
+  }
+
+  .lede strong{ color: var(--text); font-weight: 500; }
+
+  /* --- cable / patch signature --- */
+  .patch{
+    width: 100%;
+    height: 64px;
+    display:block;
+    margin: 44px 0 8px;
+    overflow: visible;
+  }
+
+  .patch path{
+    fill:none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 6 420;
+    stroke-dashoffset: 0;
+    animation: draw 2.2s ease forwards;
+    opacity: .9;
+  }
+  .patch path:nth-child(1){ stroke: var(--c01); animation-delay: 0s; }
+  .patch path:nth-child(2){ stroke: var(--c02); animation-delay: .12s; }
+  .patch path:nth-child(3){ stroke: var(--c03); animation-delay: .24s; }
+  .patch path:nth-child(4){ stroke: var(--c04); animation-delay: .36s; }
+
+  @keyframes draw{
+    from{ stroke-dasharray: 0 500; }
+    to{ stroke-dasharray: 500 500; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .patch path{ animation: none; stroke-dasharray: none; }
+    .eyebrow .dot{ animation: none; }
+  }
+
+  /* --- rack of modules --- */
+  .rack{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 640px){
+    .rack{ grid-template-columns: 1fr; }
+  }
+
+  .module{
+    position: relative;
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 24px;
+    text-decoration:none;
+    color: inherit;
+    transition: border-color .25s ease, transform .25s ease, background .25s ease;
+  }
+
+  .module:hover, .module:focus-visible{
+    border-color: var(--jack);
+    transform: translateY(-2px);
+    background: #171c1d;
+    outline: none;
+  }
+
+  .module:focus-visible{
+    box-shadow: 0 0 0 2px var(--jack);
+  }
+
+  .module .row-top{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+  }
+
+  .jack{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--jack);
+    letter-spacing: .08em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .jack::before{
+    content:"";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--jack);
+    box-shadow: 0 0 10px var(--jack);
+  }
+
+  .status{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    border: 1px solid var(--panel-line);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .module h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .module p{
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+
+  .go{
+    margin-top: auto;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    display:flex;
+    align-items:center;
+    gap: 6px;
+  }
+
+  .go svg{
+    width: 13px; height: 13px;
+    transition: transform .25s ease;
+  }
+
+  .module:hover .go svg{ transform: translateX(3px); }
+
+  #m01{ --jack: var(--c01); }
+  #m02{ --jack: var(--c02); }
+  #m03{ --jack: var(--c03); }
+  #m04{ --jack: var(--c04); }
+
+  footer{
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--panel-line);
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: .05em;
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  footer a{ color: var(--text-dim); }
+  footer a:hover{ color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow"><span class="dot"></span>panel · 4 salidas activas</div>
+    <h1>Tu nombre<span> — interfaz, juego, sonido, señal.</span></h1>
+    <p class="lede">
+      Trabajo entre <strong>interacción, código y audio</strong>: interfaces,
+      pequeños juegos, patches de síntesis y herramientas que convierten datos en sonido.
+      Cuatro salidas del panel, cuatro proyectos.
+    </p>
+  </header>
+
+  <svg class="patch" viewBox="0 0 920 64" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M 0 8 C 200 8, 260 56, 460 56 S 720 8, 920 8" />
+    <path d="M 0 20 C 220 20, 280 46, 460 46 S 700 20, 920 20" />
+    <path d="M 0 44 C 240 44, 300 18, 460 18 S 680 44, 920 44" />
+    <path d="M 0 56 C 260 56, 320 8, 460 8 S 660 56, 920 56" />
+  </svg>
+
+  <main class="rack">
+
+    <a id="m01" class="module" href="./interfaz/index.html">
+      <div class="row-top">
+        <span class="jack">JACK 01 · interfaz</span>
+        <span class="status">Ver lámina</span>
+      </div>
+      <h2>Lámina de interfaz</h2>
+      <p>Propuesta visual de interfaz — layout, jerarquía y estados listos para revisar como lámina.</p>
+      <span class="go">abrir proyecto
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <a id="m02" class="module" href="./sonidos/index.html">
+      <div class="row-top">
+        <span class="jack">JACK 02 · juego</span>
+        <span class="status">Jugar</span>
+      </div>
+      <h2>Juego web (sample)</h2>
+      <p>Prototipo jugable en el navegador: mecánica pequeña, pensada para probarse en un par de minutos.</p>
+      <span class="go">abrir proyecto
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <a id="m03" class="module" href="./sintetizador/index.html">
+      <div class="row-top">
+        <span class="jack">JACK 03 · síntesis</span>
+        <span class="status">Escuchar</span>
+      </div>
+      <h2>Sintetizador (Max)</h2>
+      <p>Patch de síntesis construido en Max/MSP — generación y control de sonido en tiempo real.</p>
+      <span class="go">abrir proyecto
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <a id="m04" class="module" href="https://juandomingoo.github.io/proyectosonificacion/" target="_blank" rel="noopener">
+      <div class="row-top">
+        <span class="jack">JACK 04 · datos</span>
+        <span class="status">Explorar</span>
+      </div>
+      <h2>Sonificador</h2>
+      <p>Herramienta que traduce datos en sonido — una forma distinta de escuchar información.</p>
+      <span class="go">abrir proyecto
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+  </main>
+
+  <footer>
+    <span>© 2026 · panel personal</span>
+    <span>contacto: tu@correo.com</span>
+  </footer>
+
+</div>
+</body>
+</html>

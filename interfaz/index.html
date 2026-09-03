@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lámina — interfaz de consola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d;
+    --c01:#f4b740;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+  }
+  .wrap{ max-width: 980px; margin:0 auto; padding:56px 24px 80px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center;
+    margin-bottom: 40px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--c01); margin-bottom:14px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-weight:600;
+    font-size: clamp(28px, 5vw, 42px); margin:0 0 12px; letter-spacing:-.01em;
+  }
+  .lede{ color:var(--dim); max-width:60ch; line-height:1.6; margin:0 0 48px; }
+
+  /* --- mockup board --- */
+  .board{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: 12px;
+    padding: 32px;
+    position: relative;
+  }
+
+  .console{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  @media (max-width:640px){ .console{ grid-template-columns: repeat(2,1fr); } }
+
+  .strip{
+    background:#0f1213;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 12px 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+
+  .strip .label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase;
+  }
+
+  .meter{
+    width:14px; height:120px; border-radius:4px;
+    background: linear-gradient(to top, #2f6f2f 0%, #2f6f2f 55%, #b98a2c 78%, #b0402f 100%);
+    position:relative; overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .meter::after{
+    content:""; position:absolute; left:0; right:0; top:0;
+    background: #0f1213;
+    height: var(--h, 35%);
+    transition: height 1.4s ease-in-out;
+  }
+  .strip:nth-child(1) .meter{ --h: 62%; }
+  .strip:nth-child(2) .meter{ --h: 30%; }
+  .strip:nth-child(3) .meter{ --h: 48%; }
+  .strip:nth-child(4) .meter{ --h: 20%; }
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width: 90px; transform: rotate(-90deg) translateY(0);
+    height: 4px; background: var(--line); border-radius: 4px; outline:none;
+    margin: 40px 0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+    background: var(--c01); cursor:pointer; border: 2px solid #0f1213;
+  }
+
+  .num{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text);
+  }
+
+  .mute{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    border:1px solid var(--line); border-radius:4px; padding:3px 10px;
+    color:var(--dim); cursor:pointer; background:none;
+  }
+  .mute[aria-pressed="true"]{ color:#0b0d0c; background:var(--c01); border-color:var(--c01); }
+
+  /* annotations */
+  .note{
+    position:absolute;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: var(--c01);
+    max-width: 180px;
+    line-height:1.4;
+    display:none;
+  }
+  .note::before{ content:"— "; }
+  @media (min-width: 860px){
+    .note{ display:block; }
+    .note.n1{ top: 40px; left: -210px; text-align:right; }
+    .note.n2{ bottom: 30px; right: -210px; }
+  }
+
+  .specs{
+    margin-top: 40px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width:640px){ .specs{ grid-template-columns:1fr; } }
+  .spec{
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .spec .k{
+    font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--dim);
+    text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;
+  }
+  .spec .v{ font-size:14px; color:var(--text); line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">lámina 01 · interfaz</div>
+  <h1>Consola de mezcla — cuatro canales</h1>
+  <p class="lede">
+    Propuesta de interfaz para una consola de mezcla minimalista: cuatro canales,
+    fader, medidor de nivel y mute por canal. Pensada para lectura rápida en
+    sesiones en vivo, con jerarquía clara entre lo que se mira siempre (nivel)
+    y lo que se toca ocasionalmente (mute).
+  </p>
+
+  <div class="board">
+    <span class="note n1">el color del medidor anticipa el clip antes de llegar al rojo</span>
+    <div class="console">
+      <div class="strip">
+        <span class="label">CH 1</span>
+        <div class="meter"></div>
+        <input type="range" min="0" max="100" value="72">
+        <span class="num">-4.2 dB</span>
+        <button class="mute" aria-pressed="false">MUTE</button>
+      </div>
+      <div class="strip">
+        <span class="label">CH 2</span>
+        <div class="meter"></div>
+        <input type="range" min="0" max="100" value="45">
+        <span class="num">-11.0 dB</span>
+        <button class="mute" aria-pressed="true">MUTE</button>
+      </div>
+      <div class="strip">
+        <span class="label">CH 3</span>
+        <div class="meter"></div>
+        <input type="range" min="0" max="100" value="58">
+        <span class="num">-7.6 dB</span>
+        <button class="mute" aria-pressed="false">MUTE</button>
+      </div>
+      <div class="strip">
+        <span class="label">CH 4</span>
+        <div class="meter"></div>
+        <input type="range" min="0" max="100" value="20">
+        <span class="num">-18.3 dB</span>
+        <button class="mute" aria-pressed="false">MUTE</button>
+      </div>
+    </div>
+    <span class="note n2">un solo tipo de botón (mute) evita que el canal compita por atención con el fader</span>
+  </div>
+
+  <div class="specs">
+    <div class="spec">
+      <div class="k">Tipografía</div>
+      <div class="v">Space Grotesk para títulos, JetBrains Mono para valores numéricos y estado.</div>
+    </div>
+    <div class="spec">
+      <div class="k">Jerarquía</div>
+      <div class="v">Medidor de nivel siempre visible; controles secundarios (mute) reducidos en tamaño y contraste.</div>
+    </div>
+    <div class="spec">
+      <div class="k">Estado</div>
+      <div class="v">Los faders y botones responden al toque — esto es una lámina de diseño, no el motor de audio real.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Himnos del Mundo — trivia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d;
+    --accent:#f4b740; --good:#6fe7dd; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding: 40px 16px 70px;
+  }
+  .wrap{ width:100%; max-width: 620px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:28px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:10px;
+  }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 28px; margin:0 0 10px; }
+  p.lede{ color:var(--dim); font-size:14px; line-height:1.6; margin:0 0 26px; max-width:52ch;}
+
+  /* progress */
+  .progress{
+    display:flex; gap:6px; margin-bottom: 22px;
+  }
+  .progress span{
+    flex:1; height:4px; border-radius:4px; background: var(--line);
+  }
+  .progress span.done{ background: var(--accent); }
+  .progress span.current{ background: var(--dim); }
+
+  .card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: 14px;
+    padding: 30px;
+  }
+
+  .flag{
+    width: 140px; height: 93px;
+    margin: 0 auto 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    display:block;
+  }
+
+  .round-label{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim);
+    text-align:center; text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;
+  }
+
+  .clue{
+    font-size: 15px; line-height:1.65; color: var(--text);
+    text-align:center; margin: 0 0 26px;
+  }
+
+  .options{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  @media (max-width:480px){ .options{ grid-template-columns:1fr; } }
+
+  .opt{
+    font-family:'Inter', sans-serif; font-size:14px; font-weight:500;
+    background:#0f1213; border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:14px 12px; cursor:pointer; text-align:center;
+    transition: border-color .2s ease, transform .15s ease;
+  }
+  .opt:hover:not(:disabled){ border-color: var(--accent); transform: translateY(-1px); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ border-color: var(--good); background: rgba(111,231,221,0.1); color: var(--good); }
+  .opt.wrong{ border-color: var(--bad); background: rgba(255,107,107,0.1); color: var(--bad); }
+
+  .fact{
+    margin-top: 20px;
+    font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--dim);
+    line-height:1.6; border-top: 1px solid var(--line); padding-top: 16px;
+    display:none;
+  }
+  .fact.show{ display:block; }
+  .fact b{ color: var(--text); }
+
+  .next{
+    margin-top: 20px; width:100%;
+    font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background: var(--accent); color:#0b0d0c; border:none;
+    border-radius:8px; padding:13px; cursor:pointer; display:none;
+  }
+  .next.show{ display:block; }
+  .next:hover{ opacity:.9; }
+
+  /* result screen */
+  .result{ display:none; text-align:center; }
+  .result.show{ display:block; }
+  .result .score{
+    font-family:'Space Grotesk', sans-serif; font-size: 56px; font-weight:700; margin: 6px 0 4px;
+  }
+  .result .score span{ font-size: 22px; color: var(--dim); font-weight:400; }
+  .result p{ color: var(--dim); font-size:14px; margin: 0 0 24px; }
+  .recap{ text-align:left; display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+  .recap-item{
+    display:flex; gap:12px; align-items:flex-start;
+    font-size: 12.5px; font-family:'JetBrains Mono', monospace; color: var(--dim);
+    border-top:1px solid var(--line); padding-top:10px;
+  }
+  .recap-item .mark{ flex-shrink:0; }
+  .recap-item .mark.ok{ color: var(--good); }
+  .recap-item .mark.no{ color: var(--bad); }
+  .restart{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background:none; color: var(--text); border:1px solid var(--line);
+    border-radius:8px; padding:13px; cursor:pointer;
+  }
+  .restart:hover{ border-color: var(--accent); color: var(--accent); }
+
+  #quizArea{ display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 02 · trivia</div>
+  <h1>Himnos del Mundo</h1>
+  <p class="lede">
+    Seis banderas, seis historias. Cada pista cuenta cómo y cuándo nació ese himno
+    — quién lo compuso, en qué contexto — y vos adivinás el país. Sin letras, solo historia.
+  </p>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="card">
+    <div id="quizArea">
+      <div class="round-label" id="roundLabel">Ronda 1 de 6</div>
+      <svg class="flag" id="flagSvg" viewBox="0 0 150 100"></svg>
+      <p class="clue" id="clueText"></p>
+      <div class="options" id="optionsArea"></div>
+      <div class="fact" id="factText"></div>
+      <button class="next" id="nextBtn">siguiente &rarr;</button>
+    </div>
+
+    <div class="result" id="resultArea">
+      <div class="round-label">resultado final</div>
+      <div class="score"><span id="scoreNum">0</span><span> / 6</span></div>
+      <p id="resultMsg"></p>
+      <div class="recap" id="recap"></div>
+      <button class="restart" id="restartBtn">jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // --- flag drawing (SVG strings, viewBox 0 0 150 100) ---
+  const flags = {
+    "Chile": `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      <rect y="50" width="150" height="50" fill="#D52B1E"/>
+      <rect width="50" height="50" fill="#0039A6"/>
+      <polygon points="25,14 29,27 42,27 31,35 35,48 25,40 15,48 19,35 8,27 21,27" fill="#FFFFFF"/>
+    `,
+    "Argentina": `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      <rect width="150" height="33.3" fill="#74ACDF"/>
+      <rect y="66.6" width="150" height="33.4" fill="#74ACDF"/>
+      <circle cx="75" cy="50" r="12" fill="#F6B40E" stroke="#85572E" stroke-width="1"/>
+    `,
+    "México": `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      <rect width="50" height="100" fill="#006847"/>
+      <rect x="100" width="50" height="100" fill="#CE1126"/>
+      <circle cx="75" cy="50" r="9" fill="#8B5E34"/>
+    `,
+    "Brasil": `
+      <rect width="150" height="100" fill="#009739"/>
+      <polygon points="75,15 140,50 75,85 10,50" fill="#FEDD00"/>
+      <circle cx="75" cy="50" r="20" fill="#012169"/>
+    `,
+    "Estados Unidos": `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      ${Array.from({length:7}).map((_,i)=>`<rect y="${i*100/13*2}" width="150" height="${100/13}" fill="#B22234"/>`).join('')}
+      <rect width="65" height="53.8" fill="#3C3B6E"/>
+    `,
+    "Francia": `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      <rect width="50" height="100" fill="#0055A4"/>
+      <rect x="100" width="50" height="100" fill="#EF4135"/>
+    `
+  };
+
+  const countries = Object.keys(flags);
+
+  const rounds = [
+    {
+      country: "Chile",
+      clue: "Su letra actual fue encargada en 1847 al poeta Eusebio Lillo, para reemplazar versos considerados demasiado antiespañoles. La música, de 1827, es obra del compositor catalán Ramón Carnicer.",
+      fact: "<b>Himno Nacional de Chile</b> · música: Ramón Carnicer (1827) · letra: Eusebio Lillo (1847)."
+    },
+    {
+      country: "Argentina",
+      clue: "Fue aprobado como 'Marcha Patriótica' el 11 de mayo de 1813, con letra de Vicente López y Planes y música de Blas Parera, apenas un año después de creada la bandera del mismo país.",
+      fact: "<b>Himno Nacional Argentino</b> · música: Blas Parera · letra: Vicente López y Planes · sancionado: 11 de mayo de 1813."
+    },
+    {
+      country: "México",
+      clue: "Su letra ganó un concurso público en 1853, escrita por el poeta Francisco González Bocanegra. La música es obra de Jaime Nunó, un director de banda de origen español radicado en el país.",
+      fact: "<b>Himno Nacional Mexicano</b> · letra: Francisco González Bocanegra · música: Jaime Nunó · adoptado: 1854."
+    },
+    {
+      country: "Brasil",
+      clue: "Su música fue compuesta en 1831, pero pasó casi un siglo sin letra oficial —se tocaba solo de forma instrumental— hasta que el gobierno fijó una letra definitiva recién en 1922.",
+      fact: "<b>Hino Nacional Brasileiro</b> · música: Francisco Manuel da Silva (1831) · letra oficial: Joaquim Osório Duque-Estrada (1922)."
+    },
+    {
+      country: "Estados Unidos",
+      clue: "Nació como un poema escrito en 1814 por un abogado que presenció un bombardeo naval durante toda una noche. El texto se adaptó a la melodía de una canción británica de un club de caballeros del siglo XVIII, y no se convirtió en himno oficial hasta 1931.",
+      fact: "<b>The Star-Spangled Banner</b> · letra: Francis Scott Key (1814) · melodía: John Stafford Smith · adoptado oficialmente: 1931."
+    },
+    {
+      country: "Francia",
+      clue: "Fue compuesto en una sola noche de abril de 1792 por un oficial del ejército como canto de guerra para las tropas revolucionarias en Estrasburgo, y debe su nombre actual a los voluntarios de otra ciudad que lo popularizaron al entrar marchando a París.",
+      fact: "<b>La Marseillaise</b> · autor: Claude Joseph Rouget de Lisle (1792) · adoptada como himno: 1795."
+    }
+  ];
+
+  let idx = 0;
+  let score = 0;
+  let answered = false;
+  let log = [];
+
+  const progressEl = document.getElementById('progress');
+  const roundLabel = document.getElementById('roundLabel');
+  const flagSvg = document.getElementById('flagSvg');
+  const clueText = document.getElementById('clueText');
+  const optionsArea = document.getElementById('optionsArea');
+  const factText = document.getElementById('factText');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizArea = document.getElementById('quizArea');
+  const resultArea = document.getElementById('resultArea');
+  const scoreNum = document.getElementById('scoreNum');
+  const resultMsg = document.getElementById('resultMsg');
+  const recap = document.getElementById('recap');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function buildProgress(){
+    progressEl.innerHTML = '';
+    rounds.forEach((_, i) => {
+      const s = document.createElement('span');
+      if(i < idx) s.classList.add('done');
+      else if(i === idx) s.classList.add('current');
+      progressEl.appendChild(s);
+    });
+  }
+
+  function shuffledOptions(correct){
+    const others = countries.filter(c => c !== correct);
+    for(let i = others.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [others[i], others[j]] = [others[j], others[i]];
+    }
+    const opts = [correct, ...others.slice(0,3)];
+    for(let i = opts.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }
+
+  function loadRound(){
+    answered = false;
+    const r = rounds[idx];
+    buildProgress();
+    roundLabel.textContent = `Ronda ${idx+1} de ${rounds.length}`;
+    flagSvg.innerHTML = flags[r.country];
+    clueText.textContent = r.clue;
+    factText.classList.remove('show');
+    factText.innerHTML = '';
+    nextBtn.classList.remove('show');
+
+    optionsArea.innerHTML = '';
+    const opts = shuffledOptions(r.country);
+    opts.forEach(name => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = name;
+      btn.addEventListener('click', () => selectAnswer(btn, name, r));
+      optionsArea.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(btn, chosen, r){
+    if(answered) return;
+    answered = true;
+    const correct = chosen === r.country;
+    if(correct) score++;
+    log.push({ country: r.country, correct });
+
+    [...optionsArea.children].forEach(b => {
+      b.disabled = true;
+      if(b.textContent === r.country) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+    });
+
+    factText.innerHTML = r.fact;
+    factText.classList.add('show');
+    nextBtn.classList.add('show');
+    nextBtn.textContent = idx === rounds.length - 1 ? 'ver resultado →' : 'siguiente →';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    idx++;
+    if(idx >= rounds.length){
+      showResult();
+    } else {
+      loadRound();
+    }
+  });
+
+  function showResult(){
+    quizArea.style.display = 'none';
+    resultArea.classList.add('show');
+    scoreNum.textContent = score;
+
+    let msg;
+    if(score === 6) msg = 'puntaje perfecto — conocés bien la historia de estos himnos.';
+    else if(score >= 4) msg = 'muy bien — te falta poco para el puntaje perfecto.';
+    else if(score >= 2) msg = 'no está mal, pero hay historias interesantes que te perdiste.';
+    else msg = 'seis historias para descubrir — probá de nuevo.';
+    resultMsg.textContent = msg;
+
+    recap.innerHTML = '';
+    log.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'recap-item';
+      div.innerHTML = `<span class="mark ${entry.correct ? 'ok' : 'no'}">${entry.correct ? '✓' : '✗'}</span><span>${entry.country}</span>`;
+      recap.appendChild(div);
+    });
+  }
+
+  restartBtn.addEventListener('click', () => {
+    idx = 0; score = 0; log = [];
+    resultArea.classList.remove('show');
+    quizArea.style.display = 'block';
+    loadRound();
+  });
+
+  loadRound();
+})();
+</script>
+</body>
+</html>

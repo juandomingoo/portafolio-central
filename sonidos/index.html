@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonidos del Mundo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf6ee; --panel:#ffffff; --line:#e8e0d0;
+    --text:#2b2621; --dim:#8a8072;
+    --accent:#e8862c; --accent-soft:#fbe6cf;
+    --good:#1fa08c; --good-soft:#d9f3ee;
+    --bad:#e0503a; --bad-soft:#fbdfd8;
+    --sky1:#cfe8ef; --sky2:#f7dfc0;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, var(--sky2), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, var(--sky1), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh; padding: 44px 16px 90px;
+  }
+  .wrap{ max-width: 760px; margin:0 auto; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:26px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:12px; font-weight:600;
+  }
+  h1{ font-family:'Fraunces', serif; font-size: 40px; font-weight:600; margin:0 0 12px; letter-spacing:-.01em; }
+  p.lede{ color:var(--dim); font-size:15px; line-height:1.65; margin:0 0 28px; max-width:56ch;}
+
+  .tabs{ display:flex; gap:10px; margin-bottom: 28px; }
+  .tab{
+    font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:600;
+    background:var(--panel); border:1.5px solid var(--line); color:var(--dim);
+    border-radius:24px; padding:10px 20px; cursor:pointer;
+    box-shadow: 0 2px 0 rgba(43,38,33,.04);
+  }
+  .tab.active{ border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* --- learn mode --- */
+  .grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 14px;
+  }
+  .card{
+    background: var(--panel); border:1.5px solid var(--line); border-radius:18px;
+    padding: 20px 14px; text-align:center; cursor:pointer;
+    transition: border-color .2s ease, transform .15s ease, box-shadow .2s ease;
+    box-shadow: 0 3px 0 rgba(43,38,33,.05);
+  }
+  .card:hover{ border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 18px rgba(232,134,44,.15); }
+  .card.playing{ border-color: var(--good); box-shadow: 0 8px 18px rgba(31,160,140,.18); }
+  .card.pending{ opacity:.55; cursor:default; }
+  .card .scene{ width:100%; height:64px; margin-bottom:12px; border-radius:10px; overflow:hidden; }
+  .card .scene svg{ width:100%; height:100%; display:block; }
+  .card .name{ font-family:'Fraunces', serif; font-weight:600; font-size:14.5px; color:var(--text); }
+  .card .status{ font-family:'JetBrains Mono', monospace; font-size:9.5px; color:var(--dim); margin-top:5px; text-transform:uppercase; letter-spacing:.05em; }
+
+  /* --- play mode --- */
+  .progress{ display:flex; gap:6px; margin-bottom: 22px; }
+  .progress span{ flex:1; height:5px; border-radius:4px; background: var(--line); }
+  .progress span.done{ background: var(--accent); }
+  .progress span.current{ background: var(--good); }
+
+  .qcard{
+    background: var(--panel); border:1.5px solid var(--line); border-radius:22px; padding:36px 30px;
+    text-align:center; box-shadow: 0 6px 0 rgba(43,38,33,.05);
+  }
+  .round-label{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--dim); text-transform:uppercase; letter-spacing:.12em; margin-bottom:22px; font-weight:600; }
+
+  .playbtn{
+    width:84px; height:84px; border-radius:50%; border:none; cursor:pointer;
+    background: var(--accent); color:#fff; font-size:28px; margin: 0 auto 26px; display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 0 #c96f1e;
+    transition: transform .1s ease;
+  }
+  .playbtn:active{ transform: translateY(4px); box-shadow: 0 2px 0 #c96f1e; }
+  .playbtn.playing{ background: var(--good); box-shadow: 0 6px 0 #157e6e; }
+
+  .hint{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim); margin-bottom:28px; line-height:1.5; }
+
+  .options{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  @media (max-width:480px){ .options{ grid-template-columns:1fr; } }
+  .opt{
+    font-family:'Inter', sans-serif; font-size:13.5px; font-weight:600;
+    background:#fbf8f2; border:1.5px solid var(--line); color:var(--text);
+    border-radius:14px; padding:14px 10px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .opt:hover:not(:disabled){ border-color: var(--accent); transform: translateY(-2px); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ border-color: var(--good); background: var(--good-soft); color: #0d6b5e; }
+  .opt.wrong{ border-color: var(--bad); background: var(--bad-soft); color: #a83824; }
+  .opt .scene{ width:100%; height:44px; border-radius:8px; overflow:hidden; }
+  .opt .scene svg{ width:100%; height:100%; display:block; }
+
+  .next{
+    margin-top:22px; width:100%; font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:700;
+    background: var(--accent); color:#fff; border:none; border-radius:12px; padding:15px; cursor:pointer;
+    box-shadow: 0 4px 0 #c96f1e; display:none;
+  }
+  .next:active{ transform: translateY(3px); box-shadow: 0 1px 0 #c96f1e; }
+  .next.show{ display:block; }
+
+  .result{ display:none; text-align:center; }
+  .result.show{ display:block; }
+  .result .score{ font-family:'Fraunces', serif; font-size:60px; font-weight:700; margin:8px 0 4px; }
+  .result .score span{ font-size:20px; color:var(--dim); font-weight:500; font-family:'Inter',sans-serif; }
+  .result .verdict{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:700;
+    padding: 6px 16px; border-radius:20px; margin-bottom:20px;
+  }
+  .verdict.win{ background: var(--good-soft); color: #0d6b5e; border:1.5px solid var(--good); }
+  .verdict.lose{ background: var(--bad-soft); color: #a83824; border:1.5px solid var(--bad); }
+  .result p.msg{ color:var(--dim); font-size:14px; margin: 0 0 26px; }
+  .restart{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:700;
+    background:#fbf8f2; color:var(--text); border:1.5px solid var(--line); border-radius:12px; padding:15px; cursor:pointer;
+  }
+  .restart:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .note{
+    margin-top: 28px; font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--dim); line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 02 · sonido</div>
+  <h1>Sonidos del Mundo</h1>
+  <p class="lede">
+    Primero aprendé cómo suena cada lugar. Después jugá: se reproduce un
+    sonido y adivinás de qué se trata entre 4 opciones. Necesitás acertar la
+    mayoría de las rondas para ganar.
+  </p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="learn">aprender</button>
+    <button class="tab" data-tab="play">jugar</button>
+  </div>
+
+  <!-- LEARN VIEW -->
+  <div class="view active" id="learnView">
+    <div class="grid" id="learnGrid"></div>
+  </div>
+
+  <!-- PLAY VIEW -->
+  <div class="view" id="playView">
+    <div class="progress" id="progress"></div>
+    <div class="qcard">
+      <div id="quizArea">
+        <div class="round-label" id="roundLabel">Ronda 1</div>
+        <button class="playbtn" id="playBtn">▶</button>
+        <div class="hint" id="hintText">tocá para escuchar</div>
+        <div class="options" id="optionsArea"></div>
+        <button class="next" id="nextBtn">siguiente &rarr;</button>
+      </div>
+      <div class="result" id="resultArea">
+        <div class="round-label">resultado final</div>
+        <div class="score"><span id="scoreNum">0</span><span id="scoreTotal"> / 9</span></div>
+        <div class="verdict" id="verdict"></div>
+        <p class="msg" id="resultMsg"></p>
+        <button class="restart" id="restartBtn">jugar de nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    Grabaciones ambientales de libre uso (Wikimedia Commons), enlazadas directo — sin alojar ni modificar el material original.
+  </p>
+</div>
+
+<audio id="player" preload="none"></audio>
+
+<script>
+(function(){
+
+  const commonsFile = (name) => name
+    ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(name)}`
+    : null;
+
+  // ---------- ilustraciones (escenas a color, dibujadas en SVG) ----------
+  const scenes = {
+    rain: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#dcecf3"/>
+      <ellipse cx="30" cy="20" rx="20" ry="11" fill="#aac4d1"/>
+      <ellipse cx="55" cy="16" rx="24" ry="13" fill="#c3d8e2"/>
+      <g stroke="#5b8aa3" stroke-width="2" stroke-linecap="round">
+        <line x1="20" y1="34" x2="16" y2="44"/><line x1="35" y1="34" x2="31" y2="44"/>
+        <line x1="50" y1="34" x2="46" y2="44"/><line x1="65" y1="34" x2="61" y2="44"/>
+        <line x1="80" y1="34" x2="76" y2="44"/>
+      </g></svg>`,
+    ocean: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#bfe3ea"/>
+      <path d="M0 34 Q10 28 20 34 T40 34 T60 34 T80 34 T100 34 V60 H0 Z" fill="#3f9bb0"/>
+      <path d="M0 44 Q10 39 20 44 T40 44 T60 44 T80 44 T100 44 V60 H0 Z" fill="#2c7f92"/>
+      <circle cx="80" cy="14" r="9" fill="#f7c948"/></svg>`,
+    beach: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#bfe3ea"/>
+      <circle cx="82" cy="12" r="8" fill="#f7c948"/>
+      <path d="M0 30 Q20 24 40 30 T100 30 V38 H0 Z" fill="#3f9bb0"/>
+      <path d="M0 40 Q30 60 100 40 V60 H0 Z" fill="#eddcb0"/></svg>`,
+    forest: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#dcefe0"/>
+      <path d="M25 44 15 24h7l-8 12h9l-9 14h22l-9-14h9l-8-12h7z" fill="#3f8f5c"/>
+      <path d="M60 44 48 20h8l-9 13h10l-10 15h26l-10-15h10l-9-13h8z" fill="#2f7448"/>
+      <path d="M85 44 76 28h5l-6 9h7l-7 11h16l-7-11h7l-6-9h5z" fill="#3f8f5c"/></svg>`,
+    thunder: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#3a3f52"/>
+      <ellipse cx="40" cy="20" rx="26" ry="13" fill="#5c6478"/>
+      <ellipse cx="65" cy="16" rx="20" ry="11" fill="#6e7690"/>
+      <polygon points="52,28 40,46 50,46 42,58 62,36 51,36" fill="#f7c948"/></svg>`,
+    campfire: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#2b2621"/>
+      <path d="M50 12c5 12-8 15-8 26a8 8 0 0 0 16 0c4 4 7 10 7 17a15 15 0 0 1-30 0c0-7 3-11 6-14 0 5 3 7 5 7-2-10 2-17 4-36z" fill="#f2803a"/>
+      <path d="M50 24c3 7-4 9-4 15a4 4 0 0 0 8 0c2 2 3 5 3 8a7 7 0 0 1-14 0c0-3 1-5 3-7 0 2 1 3 2 3-1-5 1-8 2-19z" fill="#f7c948"/>
+      <rect x="30" y="52" width="40" height="4" rx="2" fill="#5a4636"/></svg>`,
+    train: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#e7dfd0"/>
+      <rect x="20" y="20" width="60" height="24" rx="8" fill="#4d6fa3"/>
+      <rect x="28" y="26" width="12" height="10" rx="2" fill="#cfe3f3"/>
+      <rect x="46" y="26" width="12" height="10" rx="2" fill="#cfe3f3"/>
+      <rect x="64" y="26" width="12" height="10" rx="2" fill="#cfe3f3"/>
+      <circle cx="34" cy="48" r="5" fill="#2b2621"/><circle cx="66" cy="48" r="5" fill="#2b2621"/></svg>`,
+    waterfall: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#d9ede3"/>
+      <path d="M30 6h8v34h-8zM46 6h8v38h-8zM62 6h8v34h-8z" fill="#4fa7c9"/>
+      <path d="M20 40c0 10 6 16 16 16h28c10 0 16-6 16-16" fill="none" stroke="#2c7f92" stroke-width="3"/>
+      <ellipse cx="50" cy="52" rx="34" ry="6" fill="#bfe3ea"/></svg>`,
+    city: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#e4dcea"/>
+      <rect x="10" y="24" width="16" height="30" fill="#7b6a95"/>
+      <rect x="30" y="14" width="18" height="40" fill="#5f4f7c"/>
+      <rect x="52" y="28" width="14" height="26" fill="#7b6a95"/>
+      <rect x="70" y="18" width="18" height="36" fill="#5f4f7c"/>
+      <rect x="0" y="54" width="100" height="6" fill="#3a2f52"/></svg>`,
+    volcano: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#f3e0d4"/>
+      <ellipse cx="55" cy="14" rx="14" ry="7" fill="#9a8f92"/>
+      <polygon points="50,10 20,54 80,54" fill="#8a5a4a"/>
+      <polygon points="50,10 40,30 60,30" fill="#e0532f"/>
+      <path d="M50 10 44 20h5l-4 8h9l-4-8h5z" fill="#f7c948"/></svg>`,
+    snow: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#dfeaf2"/>
+      <polygon points="30,10 55,50 5,50" fill="#c3d3de"/>
+      <polygon points="70,20 92,50 48,50" fill="#aebfcc"/>
+      <polygon points="30,10 38,26 22,26" fill="#ffffff"/>
+      <circle cx="18" cy="18" r="2" fill="#ffffff"/><circle cx="80" cy="12" r="2" fill="#ffffff"/>
+      <circle cx="60" cy="8" r="1.6" fill="#ffffff"/></svg>`,
+    plane: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#bcdcef"/>
+      <ellipse cx="20" cy="16" rx="12" ry="6" fill="#ffffff"/>
+      <ellipse cx="75" cy="42" rx="14" ry="7" fill="#ffffff"/>
+      <g fill="#3a5a78">
+        <ellipse cx="50" cy="28" rx="26" ry="6"/>
+        <polygon points="40,28 30,18 36,18 46,28"/>
+        <polygon points="60,28 70,38 64,38 54,28"/>
+        <polygon points="74,26 84,22 84,30 74,30"/>
+      </g></svg>`,
+    jungle: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#c9e8c4"/>
+      <path d="M15 44c0-14 8-24 8-24s8 10 8 24z" fill="#3f8f5c"/>
+      <path d="M35 46c0-18 10-30 10-30s10 12 10 30z" fill="#2f7448"/>
+      <path d="M58 44c0-12 7-20 7-20s7 8 7 20z" fill="#3f8f5c"/>
+      <path d="M75 46c0-16 9-26 9-26s9 10 9 26z" fill="#2f7448"/>
+      <ellipse cx="50" cy="52" rx="45" ry="6" fill="#a9d69f"/></svg>`,
+    pending: `<svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="60" fill="#efe9dc"/>
+      <circle cx="50" cy="30" r="14" fill="none" stroke="#b8ac95" stroke-width="3" stroke-dasharray="5 5"/>
+      <text x="50" y="35" text-anchor="middle" font-size="16" fill="#b8ac95" font-family="monospace">?</text>
+      </svg>`
+  };
+
+  const sounds = [
+    { name: "Lluvia", audio: "Sound of rain.ogg", scene: scenes.rain, fact: "Lluvia grabada al aire libre — el repiqueteo constante son las gotas sobre distintas superficies." },
+    { name: "Océano", audio: "Waves.ogg", scene: scenes.ocean, fact: "Olas rompiendo en la orilla — el vaivén rítmico es característico del mar abierto." },
+    { name: "Playa", audio: "On a pebble beach.ogg", scene: scenes.beach, fact: "Olas suaves sobre guijarros — el arrastre de las piedras se suma al sonido del agua." },
+    { name: "Bosque", audio: "Birds forest.ogg", scene: scenes.forest, fact: "Cantos de aves grabados en un bosque — se distinguen varias especies superpuestas." },
+    { name: "Tormenta", audio: "Thunder.ogg", scene: scenes.thunder, fact: "Un trueno — el estruendo grave viene de la expansión rápida del aire por un rayo." },
+    { name: "Fogata", audio: "Campfire sound ambience.ogg", scene: scenes.campfire, fact: "Fuego de leña — los chasquidos son bolsas de humedad y resina explotando con el calor." },
+    { name: "Estación de tren", audio: "Union Station Bay Concourse Ambience (Freesound).ogg", scene: scenes.train, fact: "Ambiente de una estación de tren — se mezclan voces, pasos y anuncios a lo lejos." },
+    { name: "Cascada", audio: "Water fall.ogg", scene: scenes.waterfall, fact: "Caída de agua — el ruido blanco constante viene de miles de gotas golpeando a la vez." },
+    { name: "Ciudad", audio: "Ambient sound street traffic Berlin 2026-05-17.oga", scene: scenes.city, fact: "Tráfico urbano — motores, frenos y bocinas se mezclan en un murmullo de fondo." },
+    { name: "Selva", audio: "404114 felix-blume toucans-singing-in-the-amazonian-rainforest-brazil.ogg", scene: scenes.jungle, fact: "Selva amazónica — se escuchan tucanes junto a un fondo denso de insectos y otras aves." },
+    { name: "Nieve", audio: "Walking through snow.mp3", scene: scenes.snow, fact: "Pasos sobre nieve fresca — el crujido viene de los cristales de hielo rompiéndose." },
+    { name: "Avión", audio: "Sound in air plane 1.ogg", scene: scenes.plane, fact: "Interior de un avión en vuelo — el zumbido constante son los motores y el aire a gran velocidad." }
+  ];
+
+  sounds.forEach(s => { s.audioUrl = commonsFile(s.audio); });
+  const playable = () => sounds.filter(s => s.audioUrl);
+
+  const player = document.getElementById('player');
+
+  // ---------- TABS ----------
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab + 'View').classList.add('active');
+      player.pause();
+    });
+  });
+
+  // ---------- LEARN MODE ----------
+  const learnGrid = document.getElementById('learnGrid');
+
+  sounds.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'card' + (s.audioUrl ? '' : ' pending');
+    card.innerHTML = `
+      <div class="scene">${s.audioUrl ? s.scene : scenes.pending}</div>
+      <div class="name">${s.name}</div>
+      <div class="status">${s.audioUrl ? 'tocar para oír' : 'audio pendiente'}</div>
+    `;
+    if(s.audioUrl){
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.card').forEach(el => el.classList.remove('playing'));
+        card.classList.add('playing');
+        player.src = s.audioUrl;
+        player.play().catch(()=>{});
+      });
+    }
+    learnGrid.appendChild(card);
+  });
+
+  player.addEventListener('ended', () => {
+    document.querySelectorAll('.card').forEach(el => el.classList.remove('playing'));
+  });
+
+  // ---------- PLAY MODE ----------
+  let rounds = [];
+  let idx = 0, score = 0, answered = false;
+
+  const progressEl = document.getElementById('progress');
+  const roundLabel = document.getElementById('roundLabel');
+  const playBtn = document.getElementById('playBtn');
+  const hintText = document.getElementById('hintText');
+  const optionsArea = document.getElementById('optionsArea');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizArea = document.getElementById('quizArea');
+  const resultArea = document.getElementById('resultArea');
+  const scoreNum = document.getElementById('scoreNum');
+  const scoreTotal = document.getElementById('scoreTotal');
+  const verdictEl = document.getElementById('verdict');
+  const resultMsg = document.getElementById('resultMsg');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function setupRounds(){
+    rounds = shuffle(playable());
+    scoreTotal.textContent = ` / ${rounds.length}`;
+  }
+
+  function buildProgress(){
+    progressEl.innerHTML = '';
+    rounds.forEach((_, i) => {
+      const s = document.createElement('span');
+      if(i < idx) s.classList.add('done');
+      else if(i === idx) s.classList.add('current');
+      progressEl.appendChild(s);
+    });
+  }
+
+  function optionsFor(correct){
+    const others = sounds.filter(s => s.name !== correct.name);
+    const picks = shuffle(others).slice(0,3);
+    return shuffle([correct, ...picks]);
+  }
+
+  function loadRound(){
+    answered = false;
+    const r = rounds[idx];
+    buildProgress();
+    roundLabel.textContent = `Ronda ${idx+1} de ${rounds.length}`;
+    playBtn.classList.remove('playing');
+    playBtn.textContent = '▶';
+    hintText.textContent = 'tocá para escuchar el sonido';
+    nextBtn.classList.remove('show');
+    player.pause();
+    player.src = r.audioUrl;
+
+    optionsArea.innerHTML = '';
+    optionsFor(r).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.dataset.name = opt.name;
+      btn.innerHTML = `<div class="scene">${opt.scene}</div><span>${opt.name}</span>`;
+      btn.addEventListener('click', () => selectAnswer(btn, opt, r));
+      optionsArea.appendChild(btn);
+    });
+  }
+
+  playBtn.addEventListener('click', () => {
+    if(player.paused){
+      player.play().catch(()=>{ hintText.textContent = 'no se pudo reproducir — probá de nuevo'; });
+      playBtn.classList.add('playing');
+      playBtn.textContent = '❚❚';
+      hintText.textContent = 'reproduciendo…';
+    } else {
+      player.pause();
+      playBtn.classList.remove('playing');
+      playBtn.textContent = '▶';
+    }
+  });
+  player.addEventListener('ended', () => {
+    playBtn.classList.remove('playing');
+    playBtn.textContent = '▶';
+    hintText.textContent = 'tocá para escuchar de nuevo';
+  });
+
+  function selectAnswer(btn, chosen, r){
+    if(answered) return;
+    answered = true;
+    player.pause();
+    const correct = chosen.name === r.name;
+    if(correct) score++;
+
+    [...optionsArea.children].forEach(b => {
+      b.disabled = true;
+      if(b.dataset.name === r.name) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+    });
+
+    hintText.textContent = r.fact;
+    nextBtn.classList.add('show');
+    nextBtn.textContent = idx === rounds.length - 1 ? 'ver resultado →' : 'siguiente →';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    idx++;
+    if(idx >= rounds.length) showResult();
+    else loadRound();
+  });
+
+  function showResult(){
+    quizArea.style.display = 'none';
+    resultArea.classList.add('show');
+    scoreNum.textContent = score;
+
+    const threshold = Math.ceil(rounds.length * 0.6);
+    const win = score >= threshold;
+    verdictEl.textContent = win ? 'ganaste' : 'no alcanzó';
+    verdictEl.className = 'verdict ' + (win ? 'win' : 'lose');
+    resultMsg.textContent = win
+      ? `necesitabas ${threshold} de ${rounds.length} — lo lograste.`
+      : `necesitás al menos ${threshold} de ${rounds.length} — practicá en "aprender" y probá otra vez.`;
+  }
+
+  restartBtn.addEventListener('click', () => {
+    idx = 0; score = 0;
+    resultArea.classList.remove('show');
+    quizArea.style.display = 'block';
+    setupRounds();
+    loadRound();
+  });
+
+  setupRounds();
+  loadRound();
+})();
+</script>
+</body>
+</html>

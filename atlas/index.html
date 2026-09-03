@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Mundial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d0c; --panel:#14181a; --line:#262c2b;
+    --text:#e9e7de; --dim:#8c928d;
+    --accent:#f4b740; --good:#6fe7dd; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh; padding: 40px 16px 80px;
+  }
+  .wrap{ max-width: 620px; margin:0 auto; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--dim);
+    text-decoration:none; display:inline-flex; gap:6px; align-items:center; margin-bottom:24px;
+  }
+  a.back:hover{ color:var(--text); }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:10px;
+  }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 28px; margin:0 0 10px; }
+  p.lede{ color:var(--dim); font-size:14px; line-height:1.6; margin:0 0 26px; max-width:56ch;}
+
+  .progress{ display:flex; gap:6px; margin-bottom: 20px; }
+  .progress span{ flex:1; height:4px; border-radius:4px; background: var(--line); }
+  .progress span.done{ background: var(--accent); }
+  .progress span.current{ background: var(--dim); }
+
+  .card{ background: var(--panel); border:1px solid var(--line); border-radius:14px; padding:30px; text-align:center; }
+  .round-label{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:20px; }
+
+  .flag{
+    width: 150px; height: 100px; margin: 0 auto 20px;
+    border-radius: 6px; border:1px solid var(--line); display:block;
+  }
+
+  .question{ font-size:15px; color:var(--text); margin: 0 0 22px; }
+  .question b{ color: var(--accent); }
+
+  .options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:center; }
+  @media (max-width:480px){ .options{ grid-template-columns:1fr; } }
+  .opt{
+    font-family:'Inter', sans-serif; font-size:14px; font-weight:500;
+    background:#0f1213; border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:14px 12px; cursor:pointer;
+  }
+  .opt:hover:not(:disabled){ border-color: var(--accent); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ border-color: var(--good); background: rgba(111,231,221,0.1); color: var(--good); }
+  .opt.wrong{ border-color: var(--bad); background: rgba(255,107,107,0.1); color: var(--bad); }
+
+  .reveal{
+    margin-top: 20px; display:none; text-align:left;
+    border-top:1px solid var(--line); padding-top:18px;
+  }
+  .reveal.show{ display:block; }
+  .reveal .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--accent);
+    border:1px solid var(--accent); border-radius:20px; padding:4px 12px; margin-bottom:10px;
+  }
+  .reveal p{ font-size:13px; color:var(--dim); line-height:1.6; margin:0; }
+
+  .next{
+    margin-top:20px; width:100%; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background: var(--accent); color:#0b0d0c; border:none; border-radius:8px; padding:13px; cursor:pointer; display:none;
+  }
+  .next.show{ display:block; }
+
+  .result{ display:none; text-align:center; }
+  .result.show{ display:block; }
+  .result .score{ font-family:'Space Grotesk', sans-serif; font-size:56px; font-weight:700; margin:6px 0 4px; }
+  .result .score span{ font-size:20px; color:var(--dim); font-weight:400; }
+  .result .verdict{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:12px;
+    padding: 5px 14px; border-radius:20px; margin-bottom:18px;
+  }
+  .verdict.win{ background: rgba(111,231,221,.12); color: var(--good); border:1px solid var(--good); }
+  .verdict.lose{ background: rgba(255,107,107,.12); color: var(--bad); border:1px solid var(--bad); }
+  .result p.msg{ color:var(--dim); font-size:14px; margin: 0 0 24px; }
+  .restart{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;
+    background:none; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:13px; cursor:pointer;
+  }
+  .restart:hover{ border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; volver al panel</a>
+  <div class="eyebrow">jack 02 · geografía</div>
+  <h1>Atlas Mundial</h1>
+  <p class="lede">
+    Se muestra una bandera, adivinás su capital entre 4 opciones y se revela el
+    continente donde está. 10 rondas — necesitás acertar al menos 6 para ganar.
+  </p>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="card">
+    <div id="quizArea">
+      <div class="round-label" id="roundLabel">Ronda 1 de 10</div>
+      <svg class="flag" id="flagSvg" viewBox="0 0 150 100"></svg>
+      <p class="question" id="questionText"></p>
+      <div class="options" id="optionsArea"></div>
+      <div class="reveal" id="revealArea">
+        <span class="badge" id="continentBadge"></span>
+        <p id="factText"></p>
+      </div>
+      <button class="next" id="nextBtn">siguiente &rarr;</button>
+    </div>
+    <div class="result" id="resultArea">
+      <div class="round-label">resultado final</div>
+      <div class="score"><span id="scoreNum">0</span><span> / 10</span></div>
+      <div class="verdict" id="verdict"></div>
+      <p class="msg" id="resultMsg"></p>
+      <button class="restart" id="restartBtn">jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  const countries = [
+    { name: "Francia", capital: "París", continent: "Europa", fact: "Está en Europa occidental, sobre el Atlántico y el Mediterráneo.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="50" height="100" fill="#0055A4"/><rect x="100" width="50" height="100" fill="#EF4135"/>` },
+    { name: "Chile", capital: "Santiago", continent: "Sudamérica", fact: "Es el país más largo y angosto del continente, entre la cordillera y el Pacífico.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect y="50" width="150" height="50" fill="#D52B1E"/><rect width="50" height="50" fill="#0039A6"/>
+      <polygon points="25,14 29,27 42,27 31,35 35,48 25,40 15,48 19,35 8,27 21,27" fill="#FFFFFF"/>` },
+    { name: "Argentina", capital: "Buenos Aires", continent: "Sudamérica", fact: "Limita con Chile a través de la cordillera de los Andes.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#74ACDF"/><rect y="66.6" width="150" height="33.4" fill="#74ACDF"/>
+      <circle cx="75" cy="50" r="12" fill="#F6B40E" stroke="#85572E" stroke-width="1"/>` },
+    { name: "Uruguay", capital: "Montevideo", continent: "Sudamérica", fact: "Es uno de los países más pequeños de Sudamérica, entre Argentina y Brasil.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      ${Array.from({length:4}).map((_,i)=>`<rect y="${11+i*22}" width="150" height="11" fill="#0038A8"/>`).join('')}
+      <rect width="45" height="45" fill="#FFFFFF" stroke="#262c2b" stroke-width="0.5"/><circle cx="22" cy="22" r="10" fill="#F6B40E"/>` },
+    { name: "España", capital: "Madrid", continent: "Europa", fact: "Ocupa la mayor parte de la Península Ibérica, en el suroeste de Europa.", flag: `
+      <rect width="150" height="100" fill="#AA151B"/><rect y="25" width="150" height="50" fill="#F1BF00"/>` },
+    { name: "Brasil", capital: "Brasília", continent: "Sudamérica", fact: "Es el país más grande de Sudamérica; su capital fue construida desde cero en 1960.", flag: `
+      <rect width="150" height="100" fill="#009739"/><polygon points="75,15 140,50 75,85 10,50" fill="#FEDD00"/><circle cx="75" cy="50" r="20" fill="#012169"/>` },
+    { name: "México", capital: "Ciudad de México", continent: "Norteamérica", fact: "Su capital es una de las ciudades más pobladas del mundo.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="50" height="100" fill="#006847"/><rect x="100" width="50" height="100" fill="#CE1126"/><circle cx="75" cy="50" r="9" fill="#8B5E34"/>` },
+    { name: "Estados Unidos", capital: "Washington D.C.", continent: "Norteamérica", fact: "Su capital no pertenece a ningún estado; es un distrito federal.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/>
+      ${Array.from({length:7}).map((_,i)=>`<rect y="${i*100/13*2}" width="150" height="${100/13}" fill="#B22234"/>`).join('')}
+      <rect width="65" height="53.8" fill="#3C3B6E"/>` },
+    { name: "Bélgica", capital: "Bruselas", continent: "Europa", fact: "Su capital también es sede de instituciones de la Unión Europea.", flag: `
+      <rect width="150" height="100" fill="#FFDD00"/><rect width="50" height="100" fill="#000000"/><rect x="100" width="50" height="100" fill="#EF3340"/>` },
+    { name: "Holanda", capital: "Ámsterdam", continent: "Europa", fact: "Aunque Ámsterdam es la capital, el gobierno funciona en La Haya.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#AE1C28"/><rect y="66.6" width="150" height="33.4" fill="#21468B"/>` },
+    { name: "Suiza", capital: "Berna", continent: "Europa", fact: "Es un país sin salida al mar, en el centro de los Alpes europeos.", flag: `
+      <rect width="150" height="100" fill="#FF0000"/><rect x="63" y="30" width="24" height="40" fill="#FFFFFF"/><rect x="51" y="42" width="48" height="16" fill="#FFFFFF"/>` },
+    { name: "Cabo Verde", capital: "Praia", continent: "África", fact: "Es un archipiélago en el océano Atlántico, frente a la costa de Senegal.", flag: `
+      <rect width="150" height="100" fill="#003893"/><rect y="60" width="150" height="6" fill="#FFFFFF"/><rect y="66" width="150" height="6" fill="#CF2027"/><rect y="72" width="150" height="6" fill="#FFFFFF"/>
+      ${Array.from({length:10}).map((_,i)=>{const a=(i/10)*2*Math.PI-Math.PI/2;const x=75+18*Math.cos(a);const y=50+18*Math.sin(a);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#F7D116"/>`}).join('')}` },
+    { name: "Portugal", capital: "Lisboa", continent: "Europa", fact: "Es el país más al oeste de Europa continental.", flag: `
+      <rect width="150" height="100" fill="#FF0000"/><rect width="60" height="100" fill="#006600"/><circle cx="60" cy="50" r="16" fill="#F7D116" stroke="#FFFFFF" stroke-width="1"/>` },
+    { name: "Noruega", capital: "Oslo", continent: "Europa", fact: "Tiene una de las costas más recortadas del mundo, llena de fiordos.", flag: `
+      <rect width="150" height="100" fill="#EF2B2D"/><rect x="45" width="20" height="100" fill="#FFFFFF"/><rect y="40" width="150" height="20" fill="#FFFFFF"/>
+      <rect x="51" width="8" height="100" fill="#002868"/><rect y="46" width="150" height="8" fill="#002868"/>` },
+    { name: "Inglaterra", capital: "Londres", continent: "Europa", fact: "Forma parte del Reino Unido, en una isla del noroeste de Europa.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect x="63" width="24" height="100" fill="#CE1124"/><rect y="38" width="150" height="24" fill="#CE1124"/>` },
+    { name: "Jamaica", capital: "Kingston", continent: "Norteamérica", fact: "Es una isla del Caribe, al sur de Cuba.", flag: `
+      <rect width="150" height="100" fill="#009B3A"/><polygon points="0,0 75,50 0,100" fill="#000000"/><polygon points="150,0 75,50 150,100" fill="#000000"/>
+      <polygon points="0,0 150,100" stroke="#FED100" stroke-width="14" fill="none"/><polygon points="150,0 0,100" stroke="#FED100" stroke-width="14" fill="none"/>` },
+    { name: "Perú", capital: "Lima", continent: "Sudamérica", fact: "Su territorio incluye costa desértica, altiplano andino y selva amazónica.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="37.5" height="100" fill="#D91023"/><rect x="112.5" width="37.5" height="100" fill="#D91023"/>` },
+    { name: "Paraguay", capital: "Asunción", continent: "Sudamérica", fact: "Es uno de los dos países sudamericanos sin salida al mar.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#D52B1E"/><rect y="66.6" width="150" height="33.4" fill="#0038A8"/><circle cx="75" cy="50" r="12" fill="#FFDE00" stroke="#0038A8" stroke-width="1"/>` },
+    { name: "Bolivia", capital: "La Paz", continent: "Sudamérica", fact: "La Paz es la sede de gobierno; Sucre es la capital constitucional.", flag: `
+      <rect width="150" height="100" fill="#D52B1E"/><rect y="33.3" width="150" height="33.4" fill="#F9E300"/><rect y="66.6" width="150" height="33.4" fill="#007934"/>` },
+    { name: "Colombia", capital: "Bogotá", continent: "Sudamérica", fact: "Es el único país sudamericano con costas en el Pacífico y el Caribe.", flag: `
+      <rect width="150" height="100" fill="#FCD116"/><rect y="50" width="150" height="25" fill="#003893"/><rect y="75" width="150" height="25" fill="#CE1126"/>` },
+    { name: "Vietnam", capital: "Hanói", continent: "Asia", fact: "Se extiende en una franja larga y angosta en el sudeste asiático.", flag: `
+      <rect width="150" height="100" fill="#DA251D"/><polygon points="75,25 84,52 113,52 90,68 98,95 75,79 52,95 60,68 37,52 66,52" fill="#FFFF00"/>` },
+    { name: "Egipto", capital: "El Cairo", continent: "África", fact: "El río Nilo atraviesa el país de sur a norte hasta el Mediterráneo.", flag: `
+      <rect width="150" height="100" fill="#FFFFFF"/><rect width="150" height="33.3" fill="#CE1126"/><rect y="66.6" width="150" height="33.4" fill="#000000"/><circle cx="75" cy="50" r="10" fill="#C09300"/>` },
+    { name: "El Congo", capital: "Kinshasa", continent: "África", fact: "Es el país más grande de África subsahariana por superficie.", flag: `
+      <rect width="150" height="100" fill="#007FFF"/><polygon points="0,100 100,0 130,0 0,100" fill="#F7D618" stroke="#F7D618" stroke-width="18"/><polygon points="115,0 150,0 150,35" fill="#CE1021"/><polygon points="0,65 0,100 35,100" fill="#CE1021"/>` }
+  ];
+
+  let rounds = [];
+  let idx = 0, score = 0, answered = false, log = [];
+
+  const progressEl = document.getElementById('progress');
+  const roundLabel = document.getElementById('roundLabel');
+  const flagSvg = document.getElementById('flagSvg');
+  const questionText = document.getElementById('questionText');
+  const optionsArea = document.getElementById('optionsArea');
+  const revealArea = document.getElementById('revealArea');
+  const continentBadge = document.getElementById('continentBadge');
+  const factText = document.getElementById('factText');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizArea = document.getElementById('quizArea');
+  const resultArea = document.getElementById('resultArea');
+  const scoreNum = document.getElementById('scoreNum');
+  const verdictEl = document.getElementById('verdict');
+  const resultMsg = document.getElementById('resultMsg');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function setupRounds(){
+    rounds = shuffle(countries).slice(0, 10);
+  }
+
+  function buildProgress(){
+    progressEl.innerHTML = '';
+    rounds.forEach((_, i) => {
+      const s = document.createElement('span');
+      if(i < idx) s.classList.add('done');
+      else if(i === idx) s.classList.add('current');
+      progressEl.appendChild(s);
+    });
+  }
+
+  function capitalOptionsFor(correct){
+    const others = countries.filter(c => c.name !== correct.name);
+    const picks = shuffle(others).slice(0,3);
+    return shuffle([correct, ...picks]);
+  }
+
+  function loadRound(){
+    answered = false;
+    const r = rounds[idx];
+    buildProgress();
+    roundLabel.textContent = `Ronda ${idx+1} de ${rounds.length}`;
+    flagSvg.innerHTML = r.flag;
+    questionText.innerHTML = `¿Cuál es la <b>capital</b> de este país?`;
+    revealArea.classList.remove('show');
+    nextBtn.classList.remove('show');
+
+    optionsArea.innerHTML = '';
+    capitalOptionsFor(r).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.dataset.capital = opt.capital;
+      btn.textContent = opt.capital;
+      btn.addEventListener('click', () => selectAnswer(btn, opt, r));
+      optionsArea.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(btn, chosen, r){
+    if(answered) return;
+    answered = true;
+    const correct = chosen.name === r.name;
+    if(correct) score++;
+    log.push({ country: r.name, correct });
+
+    [...optionsArea.children].forEach(b => {
+      b.disabled = true;
+      if(b.dataset.capital === r.capital) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+    });
+
+    continentBadge.textContent = `📍 ${r.name} — ${r.continent}`;
+    factText.textContent = r.fact;
+    revealArea.classList.add('show');
+
+    nextBtn.classList.add('show');
+    nextBtn.textContent = idx === rounds.length - 1 ? 'ver resultado →' : 'siguiente →';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    idx++;
+    if(idx >= rounds.length) showResult();
+    else loadRound();
+  });
+
+  function showResult(){
+    quizArea.style.display = 'none';
+    resultArea.classList.add('show');
+    scoreNum.textContent = score;
+
+    const win = score >= 6;
+    verdictEl.textContent = win ? 'ganaste' : 'no alcanzó';
+    verdictEl.className = 'verdict ' + (win ? 'win' : 'lose');
+    resultMsg.textContent = win
+      ? 'necesitabas 6 de 10 — lo lograste.'
+      : 'necesitás al menos 6 de 10 — repasá las banderas y probá otra vez.';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    idx = 0; score = 0; log = [];
+    resultArea.classList.remove('show');
+    quizArea.style.display = 'block';
+    setupRounds();
+    loadRound();
+  });
+
+  setupRounds();
+  loadRound();
+})();
+</script>
+</body>
+</html>
