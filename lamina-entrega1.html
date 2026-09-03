@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lámina — Análisis de Interfaces: Cafetera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6F2EA;
+    --ink: #211E1B;
+    --muted: #767065;
+    --line: #D8D0C2;
+    --fisica: #B9542C;
+    --visual: #3564A6;
+    --acustica: #2E8B6E;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:#3a3630;
+    font-family:'Inter', sans-serif;
+    color: var(--ink);
+    display:flex;
+    justify-content:center;
+    padding: 40px 0;
+  }
+
+  #poster{
+    width: 1500px;
+    min-height: 1500px;
+    background: var(--paper);
+    padding: 70px 70px 60px;
+    position: relative;
+  }
+
+  .eyebrow{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 50px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 640px;
+    margin: 0 0 36px;
+  }
+
+  .legend{
+    display:flex;
+    gap: 28px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .swatch{ width: 15px; height:15px; border-radius:4px; }
+  .swatch.fisica{ background: var(--fisica); }
+  .swatch.visual{ background: var(--visual); }
+  .swatch.acustica{ background: var(--acustica); }
+
+  .stage{
+    position: relative;
+    display:grid;
+    grid-template-columns: 330px 1fr 330px;
+    gap: 20px;
+    align-items: start;
+  }
+  .col-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .col-title.right{ text-align: right; }
+
+  .item{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 6;
+    background: var(--paper);
+    min-height: 62px;
+  }
+  .col.right .item{ flex-direction: row-reverse; text-align: right; }
+
+  .item-num{
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    border: 2.5px solid var(--ink);
+    margin-top: 1px;
+  }
+  .item-num.fisica{ border-color: var(--fisica); color: var(--fisica); }
+  .item-num.visual{ border-color: var(--visual); color: var(--visual); }
+  .item-num.acustica{ border-color: var(--acustica); color: var(--acustica); }
+
+  .item-tag{
+    display:inline-block;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .item-tag.fisica{ background: var(--fisica); }
+  .item-tag.visual{ background: var(--visual); }
+  .item-tag.acustica{ background: var(--acustica); }
+  .item-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+  .item-desc{
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .illustration{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 6;
+  }
+  .view-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dot{ fill: var(--paper); stroke-width: 3; }
+  .dot.fisica{ stroke: var(--fisica); }
+  .dot.visual{ stroke: var(--visual); }
+  .dot.acustica{ stroke: var(--acustica); }
+  .dot-num{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .dot-num.fisica{ fill: var(--fisica); }
+  .dot-num.visual{ fill: var(--visual); }
+  .dot-num.acustica{ fill: var(--acustica); }
+
+  footer{
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display:flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    font-family:'Space Grotesk', sans-serif;
+  }
+
+  .instructions{
+    max-width: 1500px;
+    margin: 24px auto 0;
+    color: #ccc;
+    font-family: sans-serif;
+    font-size: 13px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div id="poster">
+  <div class="eyebrow">Entrega N°1 — Taller de Interfaces, UAI 2026</div>
+  <h1>Interfaces de una Cafetera</h1>
+  <p class="subtitle">Análisis de entradas y salidas de un electrodoméstico cotidiano, clasificadas según su tipología: física, visual o acústica.</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch fisica"></span>Física</div>
+    <div class="legend-item"><span class="swatch visual"></span>Visual / Gráfica</div>
+    <div class="legend-item"><span class="swatch acustica"></span>Acústica / Audio</div>
+  </div>
+
+  <div class="stage">
+    <!-- INPUTS -->
+    <div class="col">
+      <div class="col-title">Entradas — Inputs</div>
+
+      <div class="item" data-point="pt-1">
+        <div class="item-num visual">1</div>
+        <div>
+          <span class="item-tag visual">Visual</span>
+          <p class="item-name">Panel de programación</p>
+          <p class="item-desc">Se configura la hora de inicio en la pantalla.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-2">
+        <div class="item-num fisica">2</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Depósito de agua</p>
+          <p class="item-desc">Se llena manualmente antes de cada uso.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-3">
+        <div class="item-num fisica">3</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Perilla de intensidad</p>
+          <p class="item-desc">Se gira para ajustar la fuerza del café.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-4">
+        <div class="item-num fisica">4</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Botón de encendido</p>
+          <p class="item-desc">El usuario presiona para iniciar el ciclo de preparación.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-5">
+        <div class="item-num fisica">5</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Filtro / canasta</p>
+          <p class="item-desc">Se inserta el café molido en el compartimento.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-6">
+        <div class="item-num fisica">6</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Cable y enchufe</p>
+          <p class="item-desc">Conexión a la red eléctrica, vista trasera.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ILLUSTRATIONS -->
+    <div class="illustration">
+      <div class="view-label">Vista frontal</div>
+      <svg width="560" height="600" viewBox="0 0 560 600" xmlns="http://www.w3.org/2000/svg">
+        <!-- base -->
+        <rect x="80" y="500" width="400" height="22" rx="4" fill="#211E1B"/>
+        <!-- body -->
+        <rect x="120" y="100" width="320" height="400" rx="20" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
+        <!-- water reservoir -->
+        <rect x="390" y="140" width="42" height="220" rx="10" fill="#DCE6EF" stroke="#211E1B" stroke-width="3"/>
+        <!-- speaker -->
+        <rect x="350" y="120" width="18" height="18" rx="3" fill="#EDE6D8" stroke="#211E1B" stroke-width="2"/>
+        <path d="M372 122 q12 8 0 16" fill="none" stroke="#211E1B" stroke-width="2" stroke-linecap="round"/>
+        <path d="M378 118 q18 12 0 24" fill="none" stroke="#211E1B" stroke-width="2" stroke-linecap="round"/>
+        <!-- display -->
+        <rect x="150" y="140" width="150" height="50" rx="7" fill="#211E1B"/>
+        <rect x="160" y="150" width="130" height="30" rx="3" fill="#3D9C7F"/>
+        <!-- LED indicator -->
+        <circle cx="150" cy="220" r="8" fill="#F2C879" stroke="#211E1B" stroke-width="2.5"/>
+        <!-- knob -->
+        <circle cx="200" cy="260" r="26" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
+        <line x1="200" y1="260" x2="200" y2="238" stroke="#211E1B" stroke-width="3" stroke-linecap="round"/>
+        <!-- power button -->
+        <circle cx="270" cy="260" r="20" fill="#B9542C" stroke="#211E1B" stroke-width="3"/>
+        <!-- filter housing -->
+        <path d="M160 310 h130 l-18 75 h-94 z" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
+        <!-- carafe -->
+        <path d="M160 410 h130 v85 a65 24 0 0 1 -130 0 z" fill="none" stroke="#211E1B" stroke-width="3"/>
+        <path d="M160 410 h130 v12 h-130 z" fill="#211E1B"/>
+        <path d="M296 420 q36 6 36 42 q0 36 -36 42" fill="none" stroke="#211E1B" stroke-width="3"/>
+
+        <!-- callout points, ordered to roughly follow reading order -->
+        <circle id="pt-1" class="dot visual" cx="185" cy="165" r="12"/>
+        <text class="dot-num visual" x="185" y="166">1</text>
+
+        <circle id="pt-2" class="dot fisica" cx="411" cy="180" r="12"/>
+        <text class="dot-num fisica" x="411" y="181">2</text>
+
+        <circle id="pt-3" class="dot fisica" cx="200" cy="260" r="12"/>
+        <text class="dot-num fisica" x="200" y="261">3</text>
+
+        <circle id="pt-4" class="dot fisica" cx="270" cy="260" r="12"/>
+        <text class="dot-num fisica" x="270" y="261">4</text>
+
+        <circle id="pt-5" class="dot fisica" cx="225" cy="335" r="12"/>
+        <text class="dot-num fisica" x="225" y="336">5</text>
+
+        <circle id="pt-7" class="dot visual" cx="265" cy="165" r="12"/>
+        <text class="dot-num visual" x="265" y="166">7</text>
+
+        <circle id="pt-8" class="dot visual" cx="150" cy="220" r="12"/>
+        <text class="dot-num visual" x="150" y="221">8</text>
+
+        <circle id="pt-9" class="dot acustica" cx="359" cy="129" r="12"/>
+        <text class="dot-num acustica" x="359" y="130">9</text>
+
+        <circle id="pt-10" class="dot acustica" cx="225" cy="460" r="12"/>
+        <text class="dot-num acustica" x="225" y="461">10</text>
+      </svg>
+
+      <div class="view-label">Vista trasera / superior</div>
+      <svg width="320" height="190" viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg">
+        <rect x="70" y="35" width="180" height="115" rx="14" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
+        <path d="M140 35 q-10 -20 0 -30 q10 10 0 30" fill="none" stroke="#767065" stroke-width="3" stroke-linecap="round"/>
+        <path d="M170 35 q-10 -24 0 -36 q10 12 0 36" fill="none" stroke="#767065" stroke-width="3" stroke-linecap="round"/>
+        <path d="M250 140 q40 5 46 32" fill="none" stroke="#211E1B" stroke-width="3" stroke-linecap="round"/>
+        <rect x="292" y="166" width="16" height="10" rx="2" fill="#211E1B"/>
+
+        <circle id="pt-11" class="dot fisica" cx="155" cy="14" r="12"/>
+        <text class="dot-num fisica" x="155" y="15">11</text>
+
+        <circle id="pt-6" class="dot fisica" cx="300" cy="171" r="12"/>
+        <text class="dot-num fisica" x="300" y="172">6</text>
+      </svg>
+    </div>
+
+    <!-- OUTPUTS -->
+    <div class="col right">
+      <div class="col-title right">Salidas — Outputs</div>
+
+      <div class="item" data-point="pt-7">
+        <div class="item-num visual">7</div>
+        <div>
+          <span class="item-tag visual">Visual</span>
+          <p class="item-name">Pantalla digital</p>
+          <p class="item-desc">Muestra la hora y el temporizador de preparación.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-8">
+        <div class="item-num visual">8</div>
+        <div>
+          <span class="item-tag visual">Visual</span>
+          <p class="item-name">Luz LED indicadora</p>
+          <p class="item-desc">Se enciende para confirmar que el equipo está activo.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-9">
+        <div class="item-num acustica">9</div>
+        <div>
+          <span class="item-tag acustica">Acústica</span>
+          <p class="item-name">Beep de finalización</p>
+          <p class="item-desc">Pitido que indica que el ciclo terminó.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-10">
+        <div class="item-num acustica">10</div>
+        <div>
+          <span class="item-tag acustica">Acústica</span>
+          <p class="item-name">Sonido de goteo</p>
+          <p class="item-desc">Ruido del agua caliente filtrando a través del café.</p>
+        </div>
+      </div>
+
+      <div class="item" data-point="pt-11">
+        <div class="item-num fisica">11</div>
+        <div>
+          <span class="item-tag fisica">Física</span>
+          <p class="item-name">Vapor y calor</p>
+          <p class="item-desc">Emisión de calor visible, vista trasera.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Juan Domingo Pastorino</span>
+    <span>Taller de Interfaces — Universidad Adolfo Ibáñez, 2026</span>
+  </footer>
+</div>
+
+<div class="instructions">
+  Plantilla de referencia — reemplaza las ilustraciones SVG por tus fotos reales antes de exportar.
+</div>
+
+</body>
+</html>
