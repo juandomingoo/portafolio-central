@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrega 03 — Síntesis y Control en Max/MSP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #121316;
+    --panel: #1B1D22;
+    --border: #2A2D34;
+    --text: #ECECEE;
+    --muted: #8B8E98;
+    --amber: #F2A93B;
+    --teal: #3FC7B0;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+  }
+  a{ color: inherit; }
+  .wrap{ max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  .back{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top: 40px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration:none;
+  }
+  .back:hover{ color: var(--text); }
+
+  .kicker{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 28px 0 14px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(30px, 5vw, 42px);
+    margin: 0 0 16px;
+    line-height: 1.1;
+  }
+  .status{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-bottom: 28px;
+  }
+  .status .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+  }
+
+  p.lead{
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 560px;
+    margin: 0 0 40px;
+  }
+
+  .video-slot{
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 60px 24px;
+    text-align:center;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 16px;
+  }
+
+  .controls{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  .control-card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .control-card .label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+  .control-card .name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .control-card .desc{
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .download{
+    display:inline-flex;
+    align-items:center;
+    gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    text-decoration: none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 60px;
+  }
+  .download:hover{ background: rgba(63,199,176,0.1); }
+
+  footer{
+    padding: 30px 0 50px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back" href="../">← Volver al portafolio</a>
+
+  <div class="kicker">Entrega N°3 — Taller de Interfaces, UAI 2026</div>
+  <h1>Síntesis y Control Sonoro en Max/MSP</h1>
+  <div class="status"><span class="dot"></span>En desarrollo — video pendiente de grabar</div>
+
+  <p class="lead">Sintetizador simple en Max/MSP con interfaz en Modo Presentación: un oscilador cuya frecuencia y volumen se controlan en tiempo real, con un disparador tipo percusión y un interruptor maestro de encendido.</p>
+
+  <div class="video-slot">
+    Aquí va el video de YouTube embebido una vez grabado.<br>
+    (Reemplazar este bloque por un &lt;iframe&gt; de YouTube)
+  </div>
+
+  <h2>Controles de la interfaz</h2>
+  <div class="controls">
+    <div class="control-card">
+      <div class="label">Slider</div>
+      <div class="name">Frecuencia</div>
+      <p class="desc">Ajusta el tono del oscilador entre 100 y 2000 Hz.</p>
+    </div>
+    <div class="control-card">
+      <div class="label">Bang</div>
+      <div class="name">Disparo</div>
+      <p class="desc">Activa una envolvente percusiva sobre el tono actual.</p>
+    </div>
+    <div class="control-card">
+      <div class="label">Slider</div>
+      <div class="name">Volumen</div>
+      <p class="desc">Controla el nivel general de salida, de 0 a 1.</p>
+    </div>
+    <div class="control-card">
+      <div class="label">Toggle</div>
+      <div class="name">Encendido</div>
+      <p class="desc">Enciende o apaga por completo la salida de audio.</p>
+    </div>
+  </div>
+
+  <a class="download" href="./sintetizador-entrega3.maxpat" download>⬇ Descargar archivo .maxpat</a>
+
+  <footer>
+    Juan Domingo Pastorino — Taller de Interfaces, Universidad Adolfo Ibáñez, 2026
+  </footer>
+</div>
+
+</body>
+</html>
