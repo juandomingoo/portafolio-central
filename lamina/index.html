@@ -19,12 +19,20 @@
   *{ box-sizing:border-box; }
   body{
     margin:0;
-    background:#3a3630;
+    background:var(--paper);
     font-family:'Inter', sans-serif;
     color: var(--ink);
     display:flex;
-    justify-content:center;
-    padding: 40px 0;
+    flex-direction: column;
+    align-items:center;
+    padding: 24px 0;
+  }
+  .toolbar{
+    width: 1500px;
+    max-width: 100%;
+    margin-bottom: 16px;
+    display:flex;
+    justify-content: flex-end;
   }
 
   #poster{
@@ -52,8 +60,23 @@
     font-size: 16px;
     color: var(--muted);
     max-width: 640px;
-    margin: 0 0 36px;
+    margin: 0 0 20px;
   }
+  .download-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--acustica);
+    border: 1px solid var(--acustica);
+    border-radius: 20px;
+    padding: 6px 16px;
+    text-decoration: none;
+    margin-bottom: 30px;
+  }
+  .download-badge:hover{ background: rgba(46,139,110,0.08); }
 
   .legend{
     display:flex;
@@ -66,11 +89,12 @@
     display:flex;
     align-items:center;
     gap: 10px;
+    margin-right: 28px;
     font-family:'Space Grotesk', sans-serif;
     font-size: 14px;
     font-weight: 500;
   }
-  .swatch{ width: 15px; height:15px; border-radius:4px; }
+  .swatch{ width: 15px; height:15px; border-radius:4px; margin-right: 2px; }
   .swatch.fisica{ background: var(--fisica); }
   .swatch.visual{ background: var(--visual); }
   .swatch.acustica{ background: var(--acustica); }
@@ -82,6 +106,7 @@
     gap: 20px;
     align-items: start;
   }
+
   .col-title{
     font-family:'Space Grotesk', sans-serif;
     font-size: 13px;
@@ -98,14 +123,16 @@
   .item{
     display:flex;
     align-items:flex-start;
-    gap: 10px;
+    margin-right: 0;
     margin-bottom: 15px;
     position: relative;
     z-index: 6;
     background: var(--paper);
     min-height: 62px;
   }
+  .item > .item-num{ margin-right: 10px; }
   .col.right .item{ flex-direction: row-reverse; text-align: right; }
+  .col.right .item > .item-num{ margin-right: 0; margin-left: 10px; }
 
   .item-num{
     flex-shrink: 0;
@@ -194,18 +221,13 @@
     color: var(--muted);
     font-family:'Space Grotesk', sans-serif;
   }
-
-  .instructions{
-    max-width: 1500px;
-    margin: 24px auto 0;
-    color: #ccc;
-    font-family: sans-serif;
-    font-size: 13px;
-    text-align:center;
-  }
 </style>
 </head>
 <body>
+
+<div class="toolbar">
+  <a class="download-badge" href="./lamina-entrega1.jpg" download>⬇ Descargar lámina en alta resolución (JPG)</a>
+</div>
 
 <div id="poster">
   <div class="eyebrow">Entrega N°1 — Taller de Interfaces, UAI 2026</div>
@@ -223,7 +245,7 @@
     <div class="col">
       <div class="col-title">Entradas — Inputs</div>
 
-      <div class="item" data-point="pt-1">
+      <div class="item">
         <div class="item-num visual">1</div>
         <div>
           <span class="item-tag visual">Visual</span>
@@ -232,7 +254,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-2">
+      <div class="item">
         <div class="item-num fisica">2</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -241,7 +263,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-3">
+      <div class="item">
         <div class="item-num fisica">3</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -250,7 +272,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-4">
+      <div class="item">
         <div class="item-num fisica">4</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -259,7 +281,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-5">
+      <div class="item">
         <div class="item-num fisica">5</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -268,7 +290,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-6">
+      <div class="item">
         <div class="item-num fisica">6</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -282,34 +304,23 @@
     <div class="illustration">
       <div class="view-label">Vista frontal</div>
       <svg width="560" height="600" viewBox="0 0 560 600" xmlns="http://www.w3.org/2000/svg">
-        <!-- base -->
         <rect x="80" y="500" width="400" height="22" rx="4" fill="#211E1B"/>
-        <!-- body -->
         <rect x="120" y="100" width="320" height="400" rx="20" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
-        <!-- water reservoir -->
         <rect x="390" y="140" width="42" height="220" rx="10" fill="#DCE6EF" stroke="#211E1B" stroke-width="3"/>
-        <!-- speaker -->
         <rect x="350" y="120" width="18" height="18" rx="3" fill="#EDE6D8" stroke="#211E1B" stroke-width="2"/>
         <path d="M372 122 q12 8 0 16" fill="none" stroke="#211E1B" stroke-width="2" stroke-linecap="round"/>
         <path d="M378 118 q18 12 0 24" fill="none" stroke="#211E1B" stroke-width="2" stroke-linecap="round"/>
-        <!-- display -->
         <rect x="150" y="140" width="150" height="50" rx="7" fill="#211E1B"/>
         <rect x="160" y="150" width="130" height="30" rx="3" fill="#3D9C7F"/>
-        <!-- LED indicator -->
         <circle cx="150" cy="220" r="8" fill="#F2C879" stroke="#211E1B" stroke-width="2.5"/>
-        <!-- knob -->
         <circle cx="200" cy="260" r="26" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
         <line x1="200" y1="260" x2="200" y2="238" stroke="#211E1B" stroke-width="3" stroke-linecap="round"/>
-        <!-- power button -->
         <circle cx="270" cy="260" r="20" fill="#B9542C" stroke="#211E1B" stroke-width="3"/>
-        <!-- filter housing -->
         <path d="M160 310 h130 l-18 75 h-94 z" fill="#EDE6D8" stroke="#211E1B" stroke-width="3"/>
-        <!-- carafe -->
         <path d="M160 410 h130 v85 a65 24 0 0 1 -130 0 z" fill="none" stroke="#211E1B" stroke-width="3"/>
         <path d="M160 410 h130 v12 h-130 z" fill="#211E1B"/>
         <path d="M296 420 q36 6 36 42 q0 36 -36 42" fill="none" stroke="#211E1B" stroke-width="3"/>
 
-        <!-- callout points, ordered to roughly follow reading order -->
         <circle id="pt-1" class="dot visual" cx="185" cy="165" r="12"/>
         <text class="dot-num visual" x="185" y="166">1</text>
 
@@ -358,7 +369,7 @@
     <div class="col right">
       <div class="col-title right">Salidas — Outputs</div>
 
-      <div class="item" data-point="pt-7">
+      <div class="item">
         <div class="item-num visual">7</div>
         <div>
           <span class="item-tag visual">Visual</span>
@@ -367,7 +378,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-8">
+      <div class="item">
         <div class="item-num visual">8</div>
         <div>
           <span class="item-tag visual">Visual</span>
@@ -376,7 +387,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-9">
+      <div class="item">
         <div class="item-num acustica">9</div>
         <div>
           <span class="item-tag acustica">Acústica</span>
@@ -385,7 +396,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-10">
+      <div class="item">
         <div class="item-num acustica">10</div>
         <div>
           <span class="item-tag acustica">Acústica</span>
@@ -394,7 +405,7 @@
         </div>
       </div>
 
-      <div class="item" data-point="pt-11">
+      <div class="item">
         <div class="item-num fisica">11</div>
         <div>
           <span class="item-tag fisica">Física</span>
@@ -409,10 +420,6 @@
     <span>Juan Domingo Pastorino</span>
     <span>Taller de Interfaces — Universidad Adolfo Ibáñez, 2026</span>
   </footer>
-</div>
-
-<div class="instructions">
-  Plantilla de referencia — reemplaza las ilustraciones SVG por tus fotos reales antes de exportar.
 </div>
 
 </body>
