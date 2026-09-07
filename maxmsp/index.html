@@ -157,40 +157,41 @@
 
   <div class="kicker">Entrega N°3 — Taller de Interfaces, UAI 2026</div>
   <h1>Síntesis y Control Sonoro en Max/MSP</h1>
-  <div class="status"><span class="dot"></span>En desarrollo — video pendiente de grabar</div>
+  <div class="status"><span class="dot"></span>Publicado</div>
 
-  <p class="lead">Sintetizador simple en Max/MSP con interfaz en Modo Presentación: un oscilador cuya frecuencia y volumen se controlan en tiempo real, con un disparador tipo percusión y un interruptor maestro de encendido.</p>
+  <p class="lead">Sintetizador en Max/MSP con interfaz en Modo Presentación: selección de nota MIDI, disparo tipo percusión o sostenido, control de volumen y medidor visual en tiempo real.</p>
 
-  <div class="video-slot">
-    Aquí va el video de YouTube embebido una vez grabado.<br>
-    (Reemplazar este bloque por un &lt;iframe&gt; de YouTube)
+  <div class="video-slot" style="padding:0; border:none;">
+    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px;">
+      <iframe src="https://www.youtube.com/embed/4PhPjcPKJSs" title="Entrega 3 - Síntesis Max/MSP" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
+    </div>
   </div>
 
   <h2>Controles de la interfaz</h2>
   <div class="controls">
     <div class="control-card">
-      <div class="label">Slider</div>
-      <div class="name">Frecuencia</div>
-      <p class="desc">Ajusta el tono del oscilador entre 100 y 2000 Hz.</p>
-    </div>
-    <div class="control-card">
       <div class="label">Bang</div>
-      <div class="name">Disparo</div>
-      <p class="desc">Activa una envolvente percusiva sobre el tono actual.</p>
-    </div>
-    <div class="control-card">
-      <div class="label">Slider</div>
-      <div class="name">Volumen</div>
-      <p class="desc">Controla el nivel general de salida, de 0 a 1.</p>
+      <div class="name">Disparar</div>
+      <p class="desc">Dispara un pulso corto de la nota seleccionada.</p>
     </div>
     <div class="control-card">
       <div class="label">Toggle</div>
-      <div class="name">Encendido</div>
-      <p class="desc">Enciende o apaga por completo la salida de audio.</p>
+      <div class="name">Sostener</div>
+      <p class="desc">Mantiene la nota sonando; se libera al desactivarlo.</p>
+    </div>
+    <div class="control-card">
+      <div class="label">Bang x3 + Number</div>
+      <div class="name">Tono (nota MIDI)</div>
+      <p class="desc">Selecciona una nota (60, 67, 72) o escribe una manual.</p>
+    </div>
+    <div class="control-card">
+      <div class="label">Number</div>
+      <div class="name">Volumen</div>
+      <p class="desc">Controla el nivel general de salida, de 0 a 1.</p>
     </div>
   </div>
 
-  <a class="download" href="./sintetizador-entrega3.maxpat" download>⬇ Descargar archivo .maxpat</a>
+  <a class="download" href="./sintetizador_3final.maxpat" download>⬇ Descargar archivo .maxpat</a>
 
   <footer>
     Juan Domingo Pastorino — Taller de Interfaces, Universidad Adolfo Ibáñez, 2026
